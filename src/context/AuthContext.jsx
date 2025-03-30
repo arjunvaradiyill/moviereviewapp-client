@@ -28,9 +28,17 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      const response = await axios.post('/api/auth/login', {
-        email,
-        password,
+      // Validate input
+      if (!email || !password) {
+        throw new Error('Email and password are required');
+      }
+
+      // Format email to lowercase
+      const formattedEmail = email.toLowerCase().trim();
+
+      const response = await axios.post('/auth/login', {
+        email: formattedEmail,
+        password: password
       });
 
       if (!response.data || !response.data.token || !response.data.user) {
@@ -60,7 +68,7 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (username, email, password) => {
     try {
-      const response = await axios.post('/api/auth/register', {
+      const response = await axios.post('/auth/register', {
         username,
         email,
         password,

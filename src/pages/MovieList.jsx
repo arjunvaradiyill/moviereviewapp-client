@@ -42,7 +42,7 @@ const MovieList = () => {
       if (search) params.append('search', search);
       if (genre) params.append('genre', genre);
 
-      const response = await axios.get(`/api/movies?${params}`);
+      const response = await axios.get(`/movies?${params}`);
       setMovies(response.data);
     } catch (error) {
       console.error('Error fetching movies:', error);

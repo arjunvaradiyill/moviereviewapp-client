@@ -20,9 +20,21 @@ import {
   IconButton,
   Alert,
   CircularProgress,
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
+  Chip,
 } from '@mui/material';
 import { Delete as DeleteIcon, Edit as EditIcon } from '@mui/icons-material';
 import axios from '../utils/axios';
+
+const VALID_GENRES = [
+  'Action', 'Adventure', 'Animation', 'Comedy', 'Crime',
+  'Documentary', 'Drama', 'Family', 'Fantasy', 'History',
+  'Horror', 'Music', 'Mystery', 'Romance', 'Science Fiction',
+  'TV Movie', 'Thriller', 'War', 'Western'
+];
 
 const AdminDashboard = () => {
   const [movies, setMovies] = useState([]);
@@ -32,8 +44,8 @@ const AdminDashboard = () => {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    releaseYear: '',
-    genre: '',
+    releaseYear: new Date().getFullYear(),
+    genre: [],
     director: '',
     cast: '',
     posterUrl: '',
@@ -48,11 +60,11 @@ const AdminDashboard = () => {
 
   const fetchMovies = async () => {
     try {
-      const response = await axios.get('/api/movies');
+      const response = await axios.get('/movies');
       setMovies(response.data);
     } catch (error) {
       console.error('Error fetching movies:', error);
-      setError('Failed to fetch movies');
+      setError(error.response?.data?.message || 'Failed to fetch movies');
     } finally {
       setLoading(false);
     }
@@ -60,11 +72,18 @@ const AdminDashboard = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get('/api/users');
+      const response = await axios.get('/users');
       setUsers(response.data);
+      setError('');
     } catch (error) {
       console.error('Error fetching users:', error);
-      setError('Failed to fetch users');
+      if (error.response?.status === 401) {
+        setError('You are not authorized to view users');
+      } else if (error.response?.status === 403) {
+        setError('Admin access required to view users');
+      } else {
+        setError(error.response?.data?.message || 'Failed to fetch users');
+      }
     }
   };
 
@@ -75,7 +94,7 @@ const AdminDashboard = () => {
         title: movie.title,
         description: movie.description,
         releaseYear: movie.releaseYear,
-        genre: movie.genre.join(', '),
+        genre: movie.genre,
         director: movie.director,
         cast: movie.cast.join(', '),
         posterUrl: movie.posterUrl,
@@ -85,8 +104,8 @@ const AdminDashboard = () => {
       setFormData({
         title: '',
         description: '',
-        releaseYear: '',
-        genre: '',
+        releaseYear: new Date().getFullYear(),
+        genre: [],
         director: '',
         cast: '',
         posterUrl: '',
@@ -101,8 +120,8 @@ const AdminDashboard = () => {
     setFormData({
       title: '',
       description: '',
-      releaseYear: '',
-      genre: '',
+      releaseYear: new Date().getFullYear(),
+      genre: [],
       director: '',
       cast: '',
       posterUrl: '',
@@ -110,25 +129,64 @@ const AdminDashboard = () => {
     setError('');
   };
 
+  const validateForm = () => {
+    if (!formData.title.trim()) {
+      setError('Title is required');
+      return false;
+    }
+    if (!formData.description.trim()) {
+      setError('Description is required');
+      return false;
+    }
+    if (!formData.releaseYear || formData.releaseYear < 1888 || formData.releaseYear > new Date().getFullYear() + 5) {
+      setError('Invalid release year');
+      return false;
+    }
+    if (!formData.genre.length) {
+      setError('At least one genre is required');
+      return false;
+    }
+    if (!formData.director.trim()) {
+      setError('Director is required');
+      return false;
+    }
+    if (!formData.cast.trim()) {
+      setError('Cast is required');
+      return false;
+    }
+    try {
+      new URL(formData.posterUrl);
+    } catch (error) {
+      setError('Invalid poster URL');
+      return false;
+    }
+    return true;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+
+    if (!validateForm()) {
+      return;
+    }
+
     try {
       const movieData = {
         ...formData,
-        genre: formData.genre.split(',').map(g => g.trim()),
-        cast: formData.cast.split(',').map(actor => actor.trim()),
+        cast: formData.cast.split(',').map(actor => actor.trim()).filter(actor => actor),
       };
 
       if (selectedMovie) {
-        await axios.put(`/api/movies/${selectedMovie._id}`, movieData);
+        await axios.put(`/movies/${selectedMovie._id}`, movieData);
       } else {
-        await axios.post('/api/movies', movieData);
+        await axios.post('/movies', movieData);
       }
 
       handleCloseDialog();
       fetchMovies();
     } catch (error) {
+      console.error('Error saving movie:', error);
       setError(error.response?.data?.message || 'Failed to save movie');
     }
   };
@@ -136,12 +194,20 @@ const AdminDashboard = () => {
   const handleDeleteMovie = async (id) => {
     if (window.confirm('Are you sure you want to delete this movie?')) {
       try {
-        await axios.delete(`/api/movies/${id}`);
+        await axios.delete(`/movies/${id}`);
         fetchMovies();
       } catch (error) {
-        setError('Failed to delete movie');
+        console.error('Error deleting movie:', error);
+        setError(error.response?.data?.message || 'Failed to delete movie');
       }
     }
+  };
+
+  const handleGenreChange = (event) => {
+    setFormData({
+      ...formData,
+      genre: event.target.value,
+    });
   };
 
   if (loading) {
@@ -188,7 +254,11 @@ const AdminDashboard = () => {
                   {movies.map((movie) => (
                     <TableRow key={movie._id}>
                       <TableCell>{movie.title}</TableCell>
-                      <TableCell>{movie.genre.join(', ')}</TableCell>
+                      <TableCell>
+                        {movie.genre.map((g) => (
+                          <Chip key={g} label={g} size="small" sx={{ mr: 0.5, mb: 0.5 }} />
+                        ))}
+                      </TableCell>
                       <TableCell>{movie.releaseYear}</TableCell>
                       <TableCell>{movie.director}</TableCell>
                       <TableCell>
@@ -239,12 +309,7 @@ const AdminDashboard = () => {
       <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="md" fullWidth>
         <DialogTitle>{selectedMovie ? 'Edit Movie' : 'Add New Movie'}</DialogTitle>
         <DialogContent>
-          {error && (
-            <Alert severity="error" sx={{ mb: 2 }}>
-              {error}
-            </Alert>
-          )}
-          <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
+          <Box component="form" sx={{ mt: 2 }}>
             <TextField
               fullWidth
               label="Title"
@@ -256,11 +321,11 @@ const AdminDashboard = () => {
             <TextField
               fullWidth
               label="Description"
-              multiline
-              rows={4}
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               margin="normal"
+              multiline
+              rows={4}
               required
             />
             <TextField
@@ -268,18 +333,35 @@ const AdminDashboard = () => {
               label="Release Year"
               type="number"
               value={formData.releaseYear}
-              onChange={(e) => setFormData({ ...formData, releaseYear: e.target.value })}
+              onChange={(e) => setFormData({ ...formData, releaseYear: parseInt(e.target.value) })}
               margin="normal"
               required
+              inputProps={{
+                min: 1888,
+                max: new Date().getFullYear() + 5
+              }}
             />
-            <TextField
-              fullWidth
-              label="Genre (comma-separated)"
-              value={formData.genre}
-              onChange={(e) => setFormData({ ...formData, genre: e.target.value })}
-              margin="normal"
-              required
-            />
+            <FormControl fullWidth margin="normal" required>
+              <InputLabel>Genre</InputLabel>
+              <Select
+                multiple
+                value={formData.genre}
+                onChange={handleGenreChange}
+                renderValue={(selected) => (
+                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                    {selected.map((value) => (
+                      <Chip key={value} label={value} />
+                    ))}
+                  </Box>
+                )}
+              >
+                {VALID_GENRES.map((genre) => (
+                  <MenuItem key={genre} value={genre}>
+                    {genre}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
             <TextField
               fullWidth
               label="Director"
@@ -295,6 +377,7 @@ const AdminDashboard = () => {
               onChange={(e) => setFormData({ ...formData, cast: e.target.value })}
               margin="normal"
               required
+              helperText="Enter cast members separated by commas"
             />
             <TextField
               fullWidth
@@ -303,13 +386,14 @@ const AdminDashboard = () => {
               onChange={(e) => setFormData({ ...formData, posterUrl: e.target.value })}
               margin="normal"
               required
+              type="url"
             />
           </Box>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseDialog}>Cancel</Button>
           <Button onClick={handleSubmit} variant="contained">
-            {selectedMovie ? 'Update' : 'Add'} Movie
+            {selectedMovie ? 'Update' : 'Create'}
           </Button>
         </DialogActions>
       </Dialog>

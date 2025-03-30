@@ -57,7 +57,7 @@ const MovieDetail = () => {
 
   const fetchMovieDetails = useCallback(async () => {
     try {
-      const response = await axios.get(`/api/movies/${id}`);
+      const response = await axios.get(`/movies/${id}`);
       setMovie(response.data);
       setLoading(false);
     } catch (error) {
@@ -69,7 +69,7 @@ const MovieDetail = () => {
 
   const fetchReviews = useCallback(async () => {
     try {
-      const response = await axios.get(`/api/reviews/movie/${id}`);
+      const response = await axios.get(`/reviews/movie/${id}`);
       if (response.data) {
         setReviews(response.data);
         if (user) {
@@ -121,7 +121,7 @@ const MovieDetail = () => {
 
     setIsSubmitting(true);
     try {
-      const response = await axios.post('/api/reviews', {
+      const response = await axios.post('/reviews', {
         movieId: movie._id,
         rating: newReview.rating,
         comment: newReview.comment.trim()
@@ -176,7 +176,7 @@ const MovieDetail = () => {
         return;
       }
 
-      const response = await axios.put(`/api/reviews/${selectedReview._id}`, {
+      const response = await axios.put(`/reviews/${selectedReview._id}`, {
         rating: rating,
         comment: editingReview.comment.trim(),
       });
