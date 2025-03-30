@@ -72,17 +72,24 @@ const AdminDashboard = () => {
 
   const fetchUsers = async () => {
     try {
+      console.log('Fetching users...');
       const response = await axios.get('/users');
+      console.log('Users response:', response.data);
       setUsers(response.data);
       setError('');
     } catch (error) {
       console.error('Error fetching users:', error);
-      if (error.response?.status === 401) {
+      const errorMessage = error.response?.data?.message || 
+                          error.message || 
+                          'Failed to fetch users';
+      const statusCode = error.response?.status;
+      
+      if (statusCode === 401) {
         setError('You are not authorized to view users');
-      } else if (error.response?.status === 403) {
+      } else if (statusCode === 403) {
         setError('Admin access required to view users');
       } else {
-        setError(error.response?.data?.message || 'Failed to fetch users');
+        setError(`${errorMessage} (Status: ${statusCode || 'Unknown'})`);
       }
     }
   };
@@ -203,6 +210,40 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleDeleteUser = async (id) => {
+    if (window.confirm('Are you sure you want to delete this user?')) {
+      try {
+        console.log('Deleting user:', id);
+        await axios.delete(`/users/${id}`);
+        console.log('User deleted successfully');
+        fetchUsers();
+      } catch (error) {
+        console.error('Error deleting user:', error);
+        const errorMessage = error.response?.data?.message || 
+                           error.message || 
+                           'Failed to delete user';
+        const statusCode = error.response?.status;
+        setError(`${errorMessage} (Status: ${statusCode || 'Unknown'})`);
+      }
+    }
+  };
+
+  const handleUpdateUserRole = async (id, newRole) => {
+    try {
+      console.log('Updating user role:', id, newRole);
+      await axios.put(`/users/${id}/role`, { role: newRole });
+      console.log('User role updated successfully');
+      fetchUsers();
+    } catch (error) {
+      console.error('Error updating user role:', error);
+      const errorMessage = error.response?.data?.message || 
+                          error.message || 
+                          'Failed to update user role';
+      const statusCode = error.response?.status;
+      setError(`${errorMessage} (Status: ${statusCode || 'Unknown'})`);
+    }
+  };
+
   const handleGenreChange = (event) => {
     setFormData({
       ...formData,
@@ -289,6 +330,7 @@ const AdminDashboard = () => {
                     <TableCell>Username</TableCell>
                     <TableCell>Email</TableCell>
                     <TableCell>Role</TableCell>
+                    <TableCell>Actions</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -297,6 +339,14 @@ const AdminDashboard = () => {
                       <TableCell>{user.username}</TableCell>
                       <TableCell>{user.email}</TableCell>
                       <TableCell>{user.role}</TableCell>
+                      <TableCell>
+                        <IconButton onClick={() => handleDeleteUser(user._id)}>
+                          <DeleteIcon />
+                        </IconButton>
+                        <IconButton onClick={() => handleUpdateUserRole(user._id, user.role === 'admin' ? 'user' : 'admin')}>
+                          {user.role === 'admin' ? 'Demote' : 'Promote'}
+                        </IconButton>
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
