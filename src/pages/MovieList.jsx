@@ -15,6 +15,7 @@ import {
   InputLabel,
   Select,
   CircularProgress,
+  Alert,
 } from '@mui/material';
 import axios from '../utils/axios';
 
@@ -24,6 +25,7 @@ const MovieList = () => {
   const [search, setSearch] = useState('');
   const [genre, setGenre] = useState('');
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const genres = [
     'Action',
@@ -38,16 +40,22 @@ const MovieList = () => {
 
   const fetchMovies = useCallback(async () => {
     try {
+      setLoading(true);
+      setError(null);
       const params = new URLSearchParams();
       if (search) params.append('search', search);
       if (genre) params.append('genre', genre);
 
       console.log('Fetching movies with params:', params.toString());
-      const response = await axios.get(`/api/movies?${params}`);
+      const response = await axios.get(`/movies?${params}`);
       console.log('Movies response:', response.data);
       setMovies(response.data);
     } catch (error) {
       console.error('Error fetching movies:', error);
+      const errorMessage = error.response?.data?.message || 
+                          error.message || 
+                          'Failed to load movies. Please try again later.';
+      setError(`${errorMessage} (Status: ${error.response?.status || 'Unknown'})`);
     } finally {
       setLoading(false);
     }
@@ -101,46 +109,60 @@ const MovieList = () => {
         </FormControl>
       </Box>
 
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
+
       <Grid container spacing={3}>
-        {movies.map((movie) => (
-          <Grid item xs={12} sm={6} md={4} lg={3} key={movie._id}>
-            <Card 
-              sx={{ 
-                cursor: 'pointer',
-                '&:hover': {
-                  transform: 'scale(1.02)',
-                  transition: 'transform 0.2s ease-in-out',
-                  boxShadow: 6
-                }
-              }}
-              onClick={() => handleMovieClick(movie._id)}
-            >
-              <CardMedia
-                component="img"
-                height="300"
-                image={movie.posterUrl}
-                alt={movie.title}
-              />
-              <CardContent>
-                <Typography gutterBottom variant="h5" component="div">
-                  {movie.title}
-                </Typography>
-                <Typography variant="body2" color="text.secondary" gutterBottom>
-                  {movie.releaseYear} • {movie.genre.join(', ')}
-                </Typography>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                  <Rating value={movie.averageRating} precision={0.1} readOnly />
-                  <Typography variant="body2" color="text.secondary" sx={{ ml: 1 }}>
-                    ({movie.totalReviews} reviews)
-                  </Typography>
-                </Box>
-                <Typography variant="body2" color="text.secondary">
-                  {movie.description.substring(0, 100)}...
-                </Typography>
-              </CardContent>
-            </Card>
+        {movies.length === 0 ? (
+          <Grid item xs={12}>
+            <Typography variant="h6" align="center" color="text.secondary">
+              No movies found. Try adjusting your search or filters.
+            </Typography>
           </Grid>
-        ))}
+        ) : (
+          movies.map((movie) => (
+            <Grid item xs={12} sm={6} md={4} lg={3} key={movie._id}>
+              <Card 
+                sx={{ 
+                  cursor: 'pointer',
+                  '&:hover': {
+                    transform: 'scale(1.02)',
+                    transition: 'transform 0.2s ease-in-out',
+                    boxShadow: 6
+                  }
+                }}
+                onClick={() => handleMovieClick(movie._id)}
+              >
+                <CardMedia
+                  component="img"
+                  height="300"
+                  image={movie.posterUrl}
+                  alt={movie.title}
+                />
+                <CardContent>
+                  <Typography gutterBottom variant="h5" component="div">
+                    {movie.title}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" gutterBottom>
+                    {movie.releaseYear} • {movie.genre.join(', ')}
+                  </Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                    <Rating value={movie.averageRating} precision={0.1} readOnly />
+                    <Typography variant="body2" color="text.secondary" sx={{ ml: 1 }}>
+                      ({movie.totalReviews} reviews)
+                    </Typography>
+                  </Box>
+                  <Typography variant="body2" color="text.secondary">
+                    {movie.description.substring(0, 100)}...
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+          ))
+        )}
       </Grid>
     </Container>
   );

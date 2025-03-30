@@ -11,7 +11,7 @@ const ServerTest = () => {
     const checkServer = async () => {
       try {
         console.log('Checking server connection...');
-        const response = await axios.get('/api/test');
+        const response = await axios.get('/test');
         console.log('Server response:', response.data);
         setStatus('success');
         setMessage(`Server is working! (${response.data.timestamp})`);
@@ -23,7 +23,8 @@ const ServerTest = () => {
                            'Failed to connect to server';
         const statusCode = error.response?.status;
         const url = error.config?.url;
-        setError(`${errorMessage}${statusCode ? ` (Status: ${statusCode})` : ''}${url ? ` (URL: ${url})` : ''}`);
+        const fullUrl = `${error.config?.baseURL}${error.config?.url}`;
+        setError(`${errorMessage}${statusCode ? ` (Status: ${statusCode})` : ''}${url ? ` (URL: ${url})` : ''}${fullUrl ? ` (Full URL: ${fullUrl})` : ''}`);
       }
     };
 

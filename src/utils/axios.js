@@ -20,12 +20,17 @@ instance.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    // Ensure URL starts with /api if it's not already
+    if (!config.url.startsWith('/api') && !config.url.startsWith('http')) {
+      config.url = `/api${config.url}`;
+    }
     console.log('Making request to:', {
       url: config.url,
       method: config.method,
       data: config.data,
       headers: config.headers,
-      baseURL: config.baseURL
+      baseURL: config.baseURL,
+      fullURL: `${config.baseURL}${config.url}`
     });
     return config;
   },
@@ -41,7 +46,8 @@ instance.interceptors.response.use(
     console.log('Response received:', {
       status: response.status,
       data: response.data,
-      headers: response.headers
+      headers: response.headers,
+      url: response.config.url
     });
     return response;
   },
@@ -54,6 +60,7 @@ instance.interceptors.response.use(
       url: error.config?.url,
       method: error.config?.method,
       baseURL: error.config?.baseURL,
+      fullURL: `${error.config?.baseURL}${error.config?.url}`,
       requestData: error.config?.data
     });
     
