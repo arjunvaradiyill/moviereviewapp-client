@@ -11,7 +11,7 @@ const ServerTest = () => {
     const checkServer = async () => {
       try {
         console.log('Checking server connection...');
-        const response = await axios.get('/test');
+        const response = await axios.get('/api/test');
         console.log('Server response:', response.data);
         setStatus('success');
         setMessage(`Server is working! (${response.data.timestamp})`);
