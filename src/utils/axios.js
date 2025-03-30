@@ -24,7 +24,8 @@ instance.interceptors.request.use(
       url: config.url,
       method: config.method,
       data: config.data,
-      headers: config.headers
+      headers: config.headers,
+      baseURL: config.baseURL
     });
     return config;
   },
@@ -52,6 +53,7 @@ instance.interceptors.response.use(
       message: error.message,
       url: error.config?.url,
       method: error.config?.method,
+      baseURL: error.config?.baseURL,
       requestData: error.config?.data
     });
     

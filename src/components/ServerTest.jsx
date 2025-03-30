@@ -22,7 +22,8 @@ const ServerTest = () => {
                            error.message || 
                            'Failed to connect to server';
         const statusCode = error.response?.status;
-        setError(`${errorMessage}${statusCode ? ` (Status: ${statusCode})` : ''}`);
+        const url = error.config?.url;
+        setError(`${errorMessage}${statusCode ? ` (Status: ${statusCode})` : ''}${url ? ` (URL: ${url})` : ''}`);
       }
     };
 
