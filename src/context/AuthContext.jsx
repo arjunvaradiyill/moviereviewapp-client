@@ -36,7 +36,7 @@ export const AuthProvider = ({ children }) => {
       // Format email to lowercase
       const formattedEmail = email.toLowerCase().trim();
 
-      const response = await axios.post('/auth/login', {
+      const response = await axios.post('/api/auth/login', {
         email: formattedEmail,
         password: password
       });
@@ -68,7 +68,7 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (username, email, password) => {
     try {
-      const response = await axios.post('/auth/register', {
+      const response = await axios.post('/api/auth/register', {
         username,
         email,
         password,
