@@ -18,7 +18,11 @@ const ServerTest = () => {
       } catch (error) {
         console.error('Server check failed:', error);
         setStatus('error');
-        setError(error.response?.data?.message || error.message || 'Failed to connect to server');
+        const errorMessage = error.response?.data?.message || 
+                           error.message || 
+                           'Failed to connect to server';
+        const statusCode = error.response?.status;
+        setError(`${errorMessage}${statusCode ? ` (Status: ${statusCode})` : ''}`);
       }
     };
 
@@ -26,7 +30,14 @@ const ServerTest = () => {
   }, []);
 
   return (
-    <Box sx={{ p: 2, border: '1px solid #ccc', borderRadius: 1, mb: 2 }}>
+    <Box sx={{ 
+      p: 2, 
+      border: '1px solid #ccc', 
+      borderRadius: 1, 
+      mb: 2,
+      bgcolor: 'background.paper',
+      boxShadow: 1
+    }}>
       <Typography variant="h6" gutterBottom>
         Server Connection Test
       </Typography>
@@ -37,12 +48,12 @@ const ServerTest = () => {
         </Box>
       )}
       {status === 'success' && (
-        <Alert severity="success">
+        <Alert severity="success" sx={{ mt: 1 }}>
           {message}
         </Alert>
       )}
       {status === 'error' && (
-        <Alert severity="error">
+        <Alert severity="error" sx={{ mt: 1 }}>
           {error}
         </Alert>
       )}

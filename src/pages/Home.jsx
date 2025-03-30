@@ -11,7 +11,6 @@ import {
   useMediaQuery
 } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
-import ServerTest from '../components/ServerTest';
 import MovieIcon from '@mui/icons-material/Movie';
 import RateReviewIcon from '@mui/icons-material/RateReview';
 import GroupIcon from '@mui/icons-material/Group';
@@ -50,39 +49,34 @@ const Home = () => {
         }}
       >
         <Container>
-          <Grid container spacing={4} alignItems="center">
-            <Grid item xs={12} md={6}>
-              <Typography variant="h2" component="h1" gutterBottom>
-                Movie Review App
-              </Typography>
-              <Typography variant="h5" paragraph>
-                Your personal space to discover, review, and discuss movies
-              </Typography>
-              <Box sx={{ mt: 3 }}>
-                <Button
-                  component={RouterLink}
-                  to="/movies"
-                  variant="contained"
-                  size="large"
-                  sx={{ mr: 2, mb: isMobile ? 2 : 0 }}
-                >
-                  Browse Movies
-                </Button>
-                <Button
-                  component={RouterLink}
-                  to="/register"
-                  variant="outlined"
-                  size="large"
-                  sx={{ color: 'white', borderColor: 'white' }}
-                >
-                  Get Started
-                </Button>
-              </Box>
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <ServerTest />
-            </Grid>
-          </Grid>
+          <Box sx={{ textAlign: 'center', maxWidth: '800px', mx: 'auto' }}>
+            <Typography variant="h2" component="h1" gutterBottom>
+              Movie Review App
+            </Typography>
+            <Typography variant="h5" paragraph>
+              Your personal space to discover, review, and discuss movies
+            </Typography>
+            <Box sx={{ mt: 3 }}>
+              <Button
+                component={RouterLink}
+                to="/movies"
+                variant="contained"
+                size="large"
+                sx={{ mr: 2, mb: isMobile ? 2 : 0 }}
+              >
+                Browse Movies
+              </Button>
+              <Button
+                component={RouterLink}
+                to="/register"
+                variant="outlined"
+                size="large"
+                sx={{ color: 'white', borderColor: 'white' }}
+              >
+                Get Started
+              </Button>
+            </Box>
+          </Box>
         </Container>
       </Box>
 
