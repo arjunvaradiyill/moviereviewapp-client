@@ -1,8 +1,8 @@
 import axios from 'axios';
 
 const baseURL = process.env.NODE_ENV === 'production'
-  ? 'https://moviereview-server.onrender.com'
-  : 'http://localhost:8000';
+  ? 'https://moviereviewapp-server.onrender.com/api'
+  : 'http://localhost:8000/api';
 
 const instance = axios.create({
   baseURL,
