@@ -23,6 +23,7 @@ const Register = () => {
   });
   const [errors, setErrors] = useState({});
   const [submitError, setSubmitError] = useState('');
+  const [success, setSuccess] = useState(false);
   const { register } = useAuth();
   const navigate = useNavigate();
 
@@ -71,6 +72,7 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitError('');
+    setSuccess(false);
 
     if (!validateForm()) {
       return;
@@ -78,7 +80,23 @@ const Register = () => {
 
     try {
       await register(formData.username, formData.email, formData.password);
-      navigate('/login');
+      setSuccess(true);
+      // Clear form
+      setFormData({
+        username: '',
+        email: '',
+        password: '',
+        showPassword: false
+      });
+      // Redirect to login page after 2 seconds
+      setTimeout(() => {
+        navigate('/login', { 
+          state: { 
+            registrationSuccess: true,
+            email: formData.email 
+          } 
+        });
+      }, 2000);
     } catch (err) {
       console.error('Registration error:', err);
       setSubmitError(
@@ -100,6 +118,11 @@ const Register = () => {
             {submitError}
           </Alert>
         )}
+        {success && (
+          <Alert severity="success" sx={{ mb: 2 }}>
+            Registration successful! Redirecting to login page...
+          </Alert>
+        )}
         <Box component="form" onSubmit={handleSubmit} noValidate>
           <TextField
             fullWidth
@@ -111,6 +134,7 @@ const Register = () => {
             error={Boolean(errors.username)}
             helperText={errors.username}
             autoComplete="username"
+            disabled={success}
           />
           <TextField
             fullWidth
@@ -123,6 +147,7 @@ const Register = () => {
             error={Boolean(errors.email)}
             helperText={errors.email}
             autoComplete="email"
+            disabled={success}
           />
           <TextField
             fullWidth
@@ -135,6 +160,7 @@ const Register = () => {
             error={Boolean(errors.password)}
             helperText={errors.password}
             autoComplete="new-password"
+            disabled={success}
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end">
@@ -142,6 +168,7 @@ const Register = () => {
                     aria-label="toggle password visibility"
                     onClick={handleClickShowPassword}
                     edge="end"
+                    disabled={success}
                   >
                     {formData.showPassword ? <VisibilityOff /> : <Visibility />}
                   </IconButton>
@@ -155,6 +182,7 @@ const Register = () => {
             variant="contained"
             size="large"
             sx={{ mt: 3 }}
+            disabled={success}
           >
             Register
           </Button>

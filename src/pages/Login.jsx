@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import {
   Container,
@@ -25,6 +25,16 @@ const Login = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Check for registration success and email in location state
+  useEffect(() => {
+    if (location.state?.registrationSuccess) {
+      setFormData(prev => ({
+        ...prev,
+        email: location.state.email || ''
+      }));
+    }
+  }, [location.state]);
 
   const handleChange = (prop) => (event) => {
     setFormData({ ...formData, [prop]: event.target.value });
@@ -56,6 +66,11 @@ const Login = () => {
         <Typography variant="h4" component="h1" gutterBottom align="center">
           Login
         </Typography>
+        {location.state?.registrationSuccess && (
+          <Alert severity="success" sx={{ mb: 2 }}>
+            Registration successful! Please login with your credentials.
+          </Alert>
+        )}
         {error && (
           <Alert severity="error" sx={{ mb: 2 }}>
             {error}
@@ -71,6 +86,7 @@ const Login = () => {
             margin="normal"
             required
             autoComplete="email"
+            autoFocus={!formData.email}
           />
           <TextField
             fullWidth
@@ -81,6 +97,7 @@ const Login = () => {
             margin="normal"
             required
             autoComplete="current-password"
+            autoFocus={Boolean(formData.email)}
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end">

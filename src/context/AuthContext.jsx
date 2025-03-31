@@ -90,11 +90,14 @@ export const AuthProvider = ({ children }) => {
         throw new Error('Invalid response from server');
       }
 
+      // Set user and token immediately after successful registration
       const { token, user } = response.data;
       setToken(token);
       setUser(user);
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(user));
+
+      return { token, user }; // Return the data in case it's needed
     } catch (error) {
       console.error('Registration error:', error);
       
