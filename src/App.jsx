@@ -1,7 +1,11 @@
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
-import { AuthProvider } from './context/AuthContext';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { CssBaseline } from '@mui/material';
 import { ThemeProvider } from './context/ThemeContext';
+import { AuthProvider } from './context/AuthContext';
+import PrivateRoute from './components/PrivateRoute';
+
+// Components
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import Login from './pages/Login';
@@ -9,41 +13,58 @@ import Register from './pages/Register';
 import MovieList from './pages/MovieList';
 import MovieDetail from './pages/MovieDetail';
 import AdminDashboard from './pages/AdminDashboard';
-import ProtectedRoute from './components/ProtectedRoute';
-import AdminRoute from './components/AdminRoute';
 
-function App() {
+const App = () => {
   return (
     <ThemeProvider>
+      <CssBaseline />
       <AuthProvider>
         <Navbar />
         <Routes>
+          {/* Public Routes */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/" element={
-            <ProtectedRoute>
-              <Home />
-            </ProtectedRoute>
-          } />
-          <Route path="/movies" element={
-            <ProtectedRoute>
-              <MovieList />
-            </ProtectedRoute>
-          } />
-          <Route path="/movies/:id" element={
-            <ProtectedRoute>
-              <MovieDetail />
-            </ProtectedRoute>
-          } />
-          <Route path="/admin" element={
-            <AdminRoute>
-              <AdminDashboard />
-            </AdminRoute>
-          } />
+          
+          {/* Protected Routes */}
+          <Route
+            path="/"
+            element={
+              <PrivateRoute>
+                <Home />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/movies"
+            element={
+              <PrivateRoute>
+                <MovieList />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/movies/:id"
+            element={
+              <PrivateRoute>
+                <MovieDetail />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/admin"
+            element={
+              <PrivateRoute>
+                <AdminDashboard />
+              </PrivateRoute>
+            }
+          />
+
+          {/* Catch all route */}
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AuthProvider>
     </ThemeProvider>
   );
-}
+};
 
 export default App; 

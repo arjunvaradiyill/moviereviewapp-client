@@ -19,7 +19,7 @@ import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 const Navbar = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const { isDarkMode, toggleTheme } = useTheme();
+  const { darkMode, toggleTheme } = useTheme();
 
   const handleLogout = () => {
     logout();
@@ -93,9 +93,9 @@ const Navbar = () => {
               />
             </>
           )}
-          <Tooltip title={isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}>
+          <Tooltip title={darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}>
             <IconButton color="inherit" onClick={toggleTheme}>
-              {isDarkMode ? <Brightness7Icon /> : <Brightness4Icon />}
+              {darkMode ? <Brightness7Icon /> : <Brightness4Icon />}
             </IconButton>
           </Tooltip>
         </Box>

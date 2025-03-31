@@ -68,11 +68,23 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (username, email, password) => {
     try {
+      // Validate input
+      if (!username || !email || !password) {
+        throw new Error('All fields are required');
+      }
+
+      // Format email to lowercase
+      const formattedEmail = email.toLowerCase().trim();
+      
+      console.log('Attempting registration with:', { username, email: formattedEmail });
+
       const response = await axios.post('/auth/register', {
         username,
-        email,
+        email: formattedEmail,
         password,
       });
+
+      console.log('Registration response:', response.data);
 
       if (!response.data || !response.data.token || !response.data.user) {
         throw new Error('Invalid response from server');
@@ -85,7 +97,14 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('user', JSON.stringify(user));
     } catch (error) {
       console.error('Registration error:', error);
-      if (error.response?.status === 400) {
+      
+      if (error.response?.data?.errors) {
+        // Handle validation errors
+        const validationErrors = error.response.data.errors
+          .map(err => err.msg)
+          .join(', ');
+        throw new Error(validationErrors);
+      } else if (error.response?.status === 400) {
         throw new Error(error.response.data.message || 'Invalid registration data');
       } else if (error.response?.status === 409) {
         throw new Error('User already exists');

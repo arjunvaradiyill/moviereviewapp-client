@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import {
   Container,
   Paper,
@@ -8,50 +8,45 @@ import {
   Button,
   Box,
   Alert,
-  CircularProgress,
+  InputAdornment,
+  IconButton,
+  Link as MuiLink
 } from '@mui/material';
+import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
 
 const Login = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const { login } = useAuth();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
+    showPassword: false
   });
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const { login } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+  const handleChange = (prop) => (event) => {
+    setFormData({ ...formData, [prop]: event.target.value });
+    setError('');
+  };
+
+  const handleClickShowPassword = () => {
+    setFormData({ ...formData, showPassword: !formData.showPassword });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    setLoading(true);
 
     try {
-      // Validate form data
-      if (!formData.email || !formData.password) {
-        setError('Please fill in all fields');
-        return;
-      }
-
-      // Call the login function from AuthContext
       await login(formData.email, formData.password);
-      
-      // Redirect based on user role
+      // Navigate to the return url or default to home page
       const from = location.state?.from?.pathname || '/';
       navigate(from, { replace: true });
-    } catch (error) {
-      setError(error.message || 'Failed to login');
-    } finally {
-      setLoading(false);
+    } catch (err) {
+      console.error('Login error:', err);
+      setError(err.message || 'Failed to login');
     }
   };
 
@@ -66,28 +61,39 @@ const Login = () => {
             {error}
           </Alert>
         )}
-        <Box component="form" onSubmit={handleSubmit}>
+        <Box component="form" onSubmit={handleSubmit} noValidate>
           <TextField
             fullWidth
             label="Email"
-            name="email"
             type="email"
             value={formData.email}
-            onChange={handleChange}
+            onChange={handleChange('email')}
             margin="normal"
             required
-            disabled={loading}
+            autoComplete="email"
           />
           <TextField
             fullWidth
             label="Password"
-            name="password"
-            type="password"
+            type={formData.showPassword ? 'text' : 'password'}
             value={formData.password}
-            onChange={handleChange}
+            onChange={handleChange('password')}
             margin="normal"
             required
-            disabled={loading}
+            autoComplete="current-password"
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    aria-label="toggle password visibility"
+                    onClick={handleClickShowPassword}
+                    edge="end"
+                  >
+                    {formData.showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
           />
           <Button
             type="submit"
@@ -95,10 +101,17 @@ const Login = () => {
             variant="contained"
             size="large"
             sx={{ mt: 3 }}
-            disabled={loading}
           >
-            {loading ? <CircularProgress size={24} /> : 'Login'}
+            Login
           </Button>
+          <Box sx={{ mt: 2, textAlign: 'center' }}>
+            <Typography variant="body2">
+              Don't have an account?{' '}
+              <MuiLink component={Link} to="/register">
+                Register here
+              </MuiLink>
+            </Typography>
+          </Box>
         </Box>
       </Paper>
     </Container>
