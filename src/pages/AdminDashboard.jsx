@@ -83,9 +83,19 @@ const AdminDashboard = () => {
                           error.message || 
                           'Failed to fetch users';
       const statusCode = error.response?.status;
+      const fullUrl = error.config?.url;
+      
+      console.log('Error details:', {
+        status: statusCode,
+        url: fullUrl,
+        message: errorMessage,
+        response: error.response?.data
+      });
       
       if (statusCode === 401) {
-        setError('You are not authorized to view users');
+        setError('You are not authorized to view users. Please log in again.');
+        // Redirect to login if unauthorized
+        window.location.href = '/login';
       } else if (statusCode === 403) {
         setError('Admin access required to view users');
       } else {
