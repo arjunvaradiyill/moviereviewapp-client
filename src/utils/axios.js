@@ -1,8 +1,8 @@
 import axios from 'axios';
 
 const baseURL = process.env.NODE_ENV === 'production'
-  ? 'https://moviereviewapp-server.onrender.com/api'
-  : 'http://localhost:8000/api';
+  ? 'https://moviereviewapp-server.onrender.com'
+  : 'http://localhost:8000';
 
 const instance = axios.create({
   baseURL,
@@ -19,6 +19,10 @@ instance.interceptors.request.use(
     const token = localStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+    }
+    // Ensure URL starts with /api if it's not already
+    if (!config.url.startsWith('/api') && !config.url.startsWith('http')) {
+      config.url = `/api${config.url}`;
     }
     console.log('Making request to:', {
       url: config.url,
