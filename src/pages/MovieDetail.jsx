@@ -674,6 +674,20 @@ const MovieDetail = () => {
     return year.toString();
   };
 
+  // Helper to format the release date with month and year
+  const formatReleaseDate = (month, year) => {
+    if (!year) return '';
+    
+    if (!month) return formatReleaseYear(year);
+    
+    const monthNames = [
+      'January', 'February', 'March', 'April', 'May', 'June', 
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    
+    return `${monthNames[month - 1]} ${year}`;
+  };
+
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '70vh' }}>
@@ -1039,7 +1053,7 @@ const MovieDetail = () => {
                   </FactItem>
                   <FactItem>
                     <LocalMoviesIcon />
-                    <Typography variant="body2">Released: {formatReleaseYear(movie.releaseYear)}</Typography>
+                    <Typography variant="body2">Released: {formatReleaseDate(movie.releaseMonth, movie.releaseYear)}</Typography>
                   </FactItem>
                 </TickerContent>
               </FactsTicker>
@@ -1094,8 +1108,10 @@ const MovieDetail = () => {
                   <MovieBadge>
                     <LocalMoviesIcon />
                     <Box>
-                      <Typography variant="body2" color="text.secondary">Release Year</Typography>
-                      <Typography variant="body1" sx={{ fontWeight: 'medium' }}>{formatReleaseYear(movie.releaseYear)}</Typography>
+                      <Typography variant="body2" color="text.secondary">Release Date</Typography>
+                      <Typography variant="body1" sx={{ fontWeight: 'medium' }}>
+                        {formatReleaseDate(movie.releaseMonth, movie.releaseYear)}
+                      </Typography>
                     </Box>
                   </MovieBadge>
                   

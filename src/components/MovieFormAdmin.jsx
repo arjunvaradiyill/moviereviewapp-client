@@ -36,6 +36,21 @@ const GENRES = [
   'TV Movie', 'Thriller', 'War', 'Western'
 ];
 
+const MONTHS = [
+  { value: 1, label: 'January' },
+  { value: 2, label: 'February' },
+  { value: 3, label: 'March' },
+  { value: 4, label: 'April' },
+  { value: 5, label: 'May' },
+  { value: 6, label: 'June' },
+  { value: 7, label: 'July' },
+  { value: 8, label: 'August' },
+  { value: 9, label: 'September' },
+  { value: 10, label: 'October' },
+  { value: 11, label: 'November' },
+  { value: 12, label: 'December' },
+];
+
 const StyledPaper = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(3),
   marginBottom: theme.spacing(3),
@@ -46,6 +61,7 @@ const MovieFormAdmin = ({ movieId, onSuccess }) => {
     title: '',
     description: '',
     releaseYear: new Date().getFullYear(),
+    releaseMonth: new Date().getMonth() + 1, // Default to current month
     genre: [],
     director: '',
     cast: [],
@@ -85,6 +101,9 @@ const MovieFormAdmin = ({ movieId, onSuccess }) => {
     if (!movie.description.trim()) newErrors.description = 'Description is required';
     if (!movie.releaseYear || movie.releaseYear < 1888 || movie.releaseYear > new Date().getFullYear() + 5) {
       newErrors.releaseYear = 'Valid release year is required';
+    }
+    if (movie.releaseMonth && (movie.releaseMonth < 1 || movie.releaseMonth > 12)) {
+      newErrors.releaseMonth = 'Release month must be between 1 and 12';
     }
     if (!movie.genre.length) newErrors.genre = 'At least one genre is required';
     if (!movie.director.trim()) newErrors.director = 'Director is required';
@@ -223,7 +242,7 @@ const MovieFormAdmin = ({ movieId, onSuccess }) => {
             />
           </Grid>
           
-          <Grid item xs={12} sm={6}>
+          <Grid item xs={12} sm={3}>
             <TextField
               fullWidth
               label="Release Year"
@@ -236,6 +255,29 @@ const MovieFormAdmin = ({ movieId, onSuccess }) => {
               required
               inputProps={{ min: 1888, max: new Date().getFullYear() + 5 }}
             />
+          </Grid>
+
+          <Grid item xs={12} sm={3}>
+            <FormControl fullWidth error={!!errors.releaseMonth}>
+              <InputLabel id="release-month-label">Release Month</InputLabel>
+              <Select
+                labelId="release-month-label"
+                name="releaseMonth"
+                value={movie.releaseMonth || ''}
+                onChange={handleChange}
+                label="Release Month"
+              >
+                <MenuItem value="">
+                  <em>None</em>
+                </MenuItem>
+                {MONTHS.map((month) => (
+                  <MenuItem key={month.value} value={month.value}>
+                    {month.label}
+                  </MenuItem>
+                ))}
+              </Select>
+              {errors.releaseMonth && <FormHelperText>{errors.releaseMonth}</FormHelperText>}
+            </FormControl>
           </Grid>
           
           <Grid item xs={12}>

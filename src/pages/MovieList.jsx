@@ -74,6 +74,20 @@ const MovieList = () => {
     navigate(`/movies/${movieId}`);
   };
 
+  // Helper to format the release date with month and year
+  const formatReleaseDate = (month, year) => {
+    if (!year) return '';
+    
+    if (!month) return year.toString();
+    
+    const monthNames = [
+      'January', 'February', 'March', 'April', 'May', 'June', 
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    
+    return `${monthNames[month - 1]} ${year}`;
+  };
+
   if (loading) {
     return (
       <Container sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
@@ -147,7 +161,7 @@ const MovieList = () => {
                     {movie.title}
                   </Typography>
                   <Typography variant="body2" color="text.secondary" gutterBottom>
-                    {movie.releaseYear} • {movie.genre.join(', ')}
+                    {formatReleaseDate(movie.releaseMonth, movie.releaseYear)} • {movie.genre.join(', ')}
                   </Typography>
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                     <Rating value={movie.averageRating} precision={0.1} readOnly />
