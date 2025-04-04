@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import {
   Container,
   Paper,
@@ -32,7 +32,6 @@ const Register = () => {
   const [submitError, setSubmitError] = useState('');
   const [success, setSuccess] = useState(false);
   const { register } = useAuth();
-  const navigate = useNavigate();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
@@ -90,22 +89,7 @@ const Register = () => {
     try {
       await register(formData.username, formData.email, formData.password);
       setSuccess(true);
-      // Clear form
-      setFormData({
-        username: '',
-        email: '',
-        password: '',
-        showPassword: false
-      });
-      // Redirect to login page after 2 seconds
-      setTimeout(() => {
-        navigate('/login', { 
-          state: { 
-            registrationSuccess: true,
-            email: formData.email 
-          } 
-        });
-      }, 2000);
+      // The register function now handles redirection to login
     } catch (err) {
       console.error('Registration error:', err);
       setSubmitError(

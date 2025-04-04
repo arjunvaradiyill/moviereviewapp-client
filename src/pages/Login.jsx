@@ -33,7 +33,7 @@ const Login = () => {
 
   // Check for registration success and email in location state
   useEffect(() => {
-    if (location.state?.registrationSuccess) {
+    if (location.state?.email) {
       setFormData(prev => ({
         ...prev,
         email: location.state.email || ''
@@ -137,9 +137,9 @@ const Login = () => {
           <Typography variant="h4" component="h1" gutterBottom>
             Login
           </Typography>
-          {location.state?.registrationSuccess && (
+          {location.state?.message && (
             <Alert severity="success" sx={{ mb: 2 }}>
-              Registration successful! Please login with your credentials.
+              {location.state.message}
             </Alert>
           )}
           {error && (

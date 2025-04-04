@@ -91,18 +91,19 @@ export const AuthProvider = ({ children }) => {
 
       console.log('Registration response:', response.data);
 
-      if (!response.data || !response.data.token || !response.data.user) {
+      if (!response.data || !response.data.user) {
         throw new Error('Invalid response from server');
       }
 
-      // Set user and token immediately after successful registration
-      const { token, user } = response.data;
-      setToken(token);
-      setUser(user);
-      localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(user));
+      // Instead of logging the user in automatically, redirect to login page
+      navigate('/login', { 
+        state: { 
+          message: 'Registration successful! Please log in with your credentials.',
+          email: formattedEmail
+        } 
+      });
 
-      return { token, user }; // Return the data in case it's needed
+      return { user: response.data.user }; // Return user data in case it's needed
     } catch (error) {
       console.error('Registration error:', error);
       
