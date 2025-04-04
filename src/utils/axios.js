@@ -20,7 +20,7 @@ instance.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    // Ensure URL starts with /api if it's not already
+    // Ensure URL starts with /api if it's not already and it's not an absolute URL
     if (!config.url.startsWith('/api') && !config.url.startsWith('http')) {
       config.url = `/api${config.url}`;
     }

@@ -239,6 +239,20 @@ const Profile = () => {
     }
   };
 
+  // Helper function to format dates safely
+  const formatDate = (dateString) => {
+    if (!dateString) return 'Not available';
+    
+    const date = new Date(dateString);
+    
+    // Check if date is valid
+    if (isNaN(date.getTime())) {
+      return 'Not available';
+    }
+    
+    return date.toLocaleDateString();
+  };
+
   if (!user) {
     return (
       <Container maxWidth="md" sx={{ mt: 4 }}>
@@ -299,7 +313,7 @@ const Profile = () => {
               {user.username}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Member since {new Date(user.createdAt).toLocaleDateString()}
+              Member since {formatDate(user.createdAt)}
             </Typography>
           </Box>
           <Box sx={{ ml: 'auto' }}>
@@ -334,7 +348,7 @@ const Profile = () => {
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
             <DateRangeIcon sx={{ mr: 1, color: 'text.secondary' }} />
             <Typography>
-              Joined: {new Date(user.createdAt).toLocaleDateString()}
+              Joined: {formatDate(user.createdAt)}
             </Typography>
           </Box>
         </Box>

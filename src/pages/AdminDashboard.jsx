@@ -6,11 +6,6 @@ import {
   Typography,
   Box,
   Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
   Table,
   TableBody,
   TableCell,
@@ -20,36 +15,21 @@ import {
   IconButton,
   Alert,
   CircularProgress,
-  MenuItem,
-  Select,
-  FormControl,
-  InputLabel,
   Chip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from '@mui/material';
-import { Delete as DeleteIcon, Edit as EditIcon } from '@mui/icons-material';
+import { Delete as DeleteIcon, Edit as EditIcon, Movie as MovieIcon, Link as LinkIcon } from '@mui/icons-material';
 import axios from '../utils/axios';
-
-const VALID_GENRES = [
-  'Action', 'Adventure', 'Animation', 'Comedy', 'Crime',
-  'Documentary', 'Drama', 'Family', 'Fantasy', 'History',
-  'Horror', 'Music', 'Mystery', 'Romance', 'Science Fiction',
-  'TV Movie', 'Thriller', 'War', 'Western'
-];
+import MovieFormAdmin from '../components/MovieFormAdmin';
 
 const AdminDashboard = () => {
   const [movies, setMovies] = useState([]);
   const [users, setUsers] = useState([]);
-  const [openDialog, setOpenDialog] = useState(false);
+  const [openMovieDialog, setOpenMovieDialog] = useState(false);
   const [selectedMovie, setSelectedMovie] = useState(null);
-  const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    releaseYear: new Date().getFullYear(),
-    genre: [],
-    director: '',
-    cast: '',
-    posterUrl: '',
-  });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
 
@@ -72,9 +52,7 @@ const AdminDashboard = () => {
 
   const fetchUsers = async () => {
     try {
-      console.log('Fetching users...');
       const response = await axios.get('/users');
-      console.log('Users response:', response.data);
       setUsers(response.data);
       setError('');
     } catch (error) {
@@ -83,18 +61,9 @@ const AdminDashboard = () => {
                           error.message || 
                           'Failed to fetch users';
       const statusCode = error.response?.status;
-      const fullUrl = error.config?.url;
-      
-      console.log('Error details:', {
-        status: statusCode,
-        url: fullUrl,
-        message: errorMessage,
-        response: error.response?.data
-      });
       
       if (statusCode === 401) {
         setError('You are not authorized to view users. Please log in again.');
-        // Redirect to login if unauthorized
         window.location.href = '/login';
       } else if (statusCode === 403) {
         setError('Admin access required to view users');
@@ -104,108 +73,19 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleOpenDialog = (movie = null) => {
-    if (movie) {
-      setSelectedMovie(movie);
-      setFormData({
-        title: movie.title,
-        description: movie.description,
-        releaseYear: movie.releaseYear,
-        genre: movie.genre,
-        director: movie.director,
-        cast: movie.cast.join(', '),
-        posterUrl: movie.posterUrl,
-      });
-    } else {
-      setSelectedMovie(null);
-      setFormData({
-        title: '',
-        description: '',
-        releaseYear: new Date().getFullYear(),
-        genre: [],
-        director: '',
-        cast: '',
-        posterUrl: '',
-      });
-    }
-    setOpenDialog(true);
+  const handleOpenMovieDialog = (movie = null) => {
+    setSelectedMovie(movie);
+    setOpenMovieDialog(true);
   };
 
-  const handleCloseDialog = () => {
-    setOpenDialog(false);
+  const handleCloseMovieDialog = () => {
+    setOpenMovieDialog(false);
     setSelectedMovie(null);
-    setFormData({
-      title: '',
-      description: '',
-      releaseYear: new Date().getFullYear(),
-      genre: [],
-      director: '',
-      cast: '',
-      posterUrl: '',
-    });
-    setError('');
   };
 
-  const validateForm = () => {
-    if (!formData.title.trim()) {
-      setError('Title is required');
-      return false;
-    }
-    if (!formData.description.trim()) {
-      setError('Description is required');
-      return false;
-    }
-    if (!formData.releaseYear || formData.releaseYear < 1888 || formData.releaseYear > new Date().getFullYear() + 5) {
-      setError('Invalid release year');
-      return false;
-    }
-    if (!formData.genre.length) {
-      setError('At least one genre is required');
-      return false;
-    }
-    if (!formData.director.trim()) {
-      setError('Director is required');
-      return false;
-    }
-    if (!formData.cast.trim()) {
-      setError('Cast is required');
-      return false;
-    }
-    try {
-      new URL(formData.posterUrl);
-    } catch (error) {
-      setError('Invalid poster URL');
-      return false;
-    }
-    return true;
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-
-    if (!validateForm()) {
-      return;
-    }
-
-    try {
-      const movieData = {
-        ...formData,
-        cast: formData.cast.split(',').map(actor => actor.trim()).filter(actor => actor),
-      };
-
-      if (selectedMovie) {
-        await axios.put(`/movies/${selectedMovie._id}`, movieData);
-      } else {
-        await axios.post('/movies', movieData);
-      }
-
-      handleCloseDialog();
-      fetchMovies();
-    } catch (error) {
-      console.error('Error saving movie:', error);
-      setError(error.response?.data?.message || 'Failed to save movie');
-    }
+  const handleMovieFormSuccess = () => {
+    fetchMovies();
+    handleCloseMovieDialog();
   };
 
   const handleDeleteMovie = async (id) => {
@@ -223,9 +103,7 @@ const AdminDashboard = () => {
   const handleDeleteUser = async (id) => {
     if (window.confirm('Are you sure you want to delete this user?')) {
       try {
-        console.log('Deleting user:', id);
         await axios.delete(`/users/${id}`);
-        console.log('User deleted successfully');
         fetchUsers();
       } catch (error) {
         console.error('Error deleting user:', error);
@@ -240,9 +118,7 @@ const AdminDashboard = () => {
 
   const handleUpdateUserRole = async (id, newRole) => {
     try {
-      console.log('Updating user role:', id, newRole);
       await axios.put(`/users/${id}/role`, { role: newRole });
-      console.log('User role updated successfully');
       fetchUsers();
     } catch (error) {
       console.error('Error updating user role:', error);
@@ -252,13 +128,6 @@ const AdminDashboard = () => {
       const statusCode = error.response?.status;
       setError(`${errorMessage} (Status: ${statusCode || 'Unknown'})`);
     }
-  };
-
-  const handleGenreChange = (event) => {
-    setFormData({
-      ...formData,
-      genre: event.target.value,
-    });
   };
 
   if (loading) {
@@ -273,7 +142,7 @@ const AdminDashboard = () => {
     <Container>
       <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Typography variant="h4">Admin Dashboard</Typography>
-        <Button variant="contained" onClick={() => handleOpenDialog()}>
+        <Button variant="contained" onClick={() => handleOpenMovieDialog()}>
           Add New Movie
         </Button>
       </Box>
@@ -298,6 +167,7 @@ const AdminDashboard = () => {
                     <TableCell>Genre</TableCell>
                     <TableCell>Release Year</TableCell>
                     <TableCell>Director</TableCell>
+                    <TableCell>Media</TableCell>
                     <TableCell>Actions</TableCell>
                   </TableRow>
                 </TableHead>
@@ -313,7 +183,32 @@ const AdminDashboard = () => {
                       <TableCell>{movie.releaseYear}</TableCell>
                       <TableCell>{movie.director}</TableCell>
                       <TableCell>
-                        <IconButton onClick={() => handleOpenDialog(movie)}>
+                        <Box sx={{ display: 'flex', gap: 1 }}>
+                          <Chip 
+                            icon={<MovieIcon />} 
+                            label="Poster" 
+                            size="small" 
+                            color={movie.posterUrl ? "primary" : "default"} 
+                            variant={movie.posterUrl ? "filled" : "outlined"}
+                          />
+                          <Chip 
+                            icon={<MovieIcon />} 
+                            label="Banner" 
+                            size="small" 
+                            color={movie.bannerUrl ? "primary" : "default"} 
+                            variant={movie.bannerUrl ? "filled" : "outlined"}
+                          />
+                          <Chip 
+                            icon={<LinkIcon />} 
+                            label="Trailer" 
+                            size="small" 
+                            color={movie.trailerUrl ? "primary" : "default"} 
+                            variant={movie.trailerUrl ? "filled" : "outlined"}
+                          />
+                        </Box>
+                      </TableCell>
+                      <TableCell>
+                        <IconButton onClick={() => handleOpenMovieDialog(movie)}>
                           <EditIcon />
                         </IconButton>
                         <IconButton onClick={() => handleDeleteMovie(movie._id)}>
@@ -340,6 +235,7 @@ const AdminDashboard = () => {
                     <TableCell>Username</TableCell>
                     <TableCell>Email</TableCell>
                     <TableCell>Role</TableCell>
+                    <TableCell>Created At</TableCell>
                     <TableCell>Actions</TableCell>
                   </TableRow>
                 </TableHead>
@@ -348,13 +244,20 @@ const AdminDashboard = () => {
                     <TableRow key={user._id}>
                       <TableCell>{user.username}</TableCell>
                       <TableCell>{user.email}</TableCell>
-                      <TableCell>{user.role}</TableCell>
+                      <TableCell>
+                        <Chip
+                          label={user.role}
+                          color={user.role === 'admin' ? 'primary' : 'default'}
+                          onClick={() => {
+                            const newRole = user.role === 'admin' ? 'user' : 'admin';
+                            handleUpdateUserRole(user._id, newRole);
+                          }}
+                        />
+                      </TableCell>
+                      <TableCell>{new Date(user.createdAt).toLocaleDateString()}</TableCell>
                       <TableCell>
                         <IconButton onClick={() => handleDeleteUser(user._id)}>
                           <DeleteIcon />
-                        </IconButton>
-                        <IconButton onClick={() => handleUpdateUserRole(user._id, user.role === 'admin' ? 'user' : 'admin')}>
-                          {user.role === 'admin' ? 'Demote' : 'Promote'}
                         </IconButton>
                       </TableCell>
                     </TableRow>
@@ -366,95 +269,25 @@ const AdminDashboard = () => {
         </Grid>
       </Grid>
 
-      <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="md" fullWidth>
-        <DialogTitle>{selectedMovie ? 'Edit Movie' : 'Add New Movie'}</DialogTitle>
+      {/* Movie Form Dialog */}
+      <Dialog 
+        open={openMovieDialog} 
+        onClose={handleCloseMovieDialog} 
+        maxWidth="md" 
+        fullWidth
+        sx={{ '& .MuiDialogContent-root': { px: 3, py: 1 } }}
+      >
+        <DialogTitle>
+          {selectedMovie ? 'Edit Movie' : 'Add New Movie'}
+        </DialogTitle>
         <DialogContent>
-          <Box component="form" sx={{ mt: 2 }}>
-            <TextField
-              fullWidth
-              label="Title"
-              value={formData.title}
-              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              margin="normal"
-              required
-            />
-            <TextField
-              fullWidth
-              label="Description"
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              margin="normal"
-              multiline
-              rows={4}
-              required
-            />
-            <TextField
-              fullWidth
-              label="Release Year"
-              type="number"
-              value={formData.releaseYear}
-              onChange={(e) => setFormData({ ...formData, releaseYear: parseInt(e.target.value) })}
-              margin="normal"
-              required
-              inputProps={{
-                min: 1888,
-                max: new Date().getFullYear() + 5
-              }}
-            />
-            <FormControl fullWidth margin="normal" required>
-              <InputLabel>Genre</InputLabel>
-              <Select
-                multiple
-                value={formData.genre}
-                onChange={handleGenreChange}
-                renderValue={(selected) => (
-                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                    {selected.map((value) => (
-                      <Chip key={value} label={value} />
-                    ))}
-                  </Box>
-                )}
-              >
-                {VALID_GENRES.map((genre) => (
-                  <MenuItem key={genre} value={genre}>
-                    {genre}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            <TextField
-              fullWidth
-              label="Director"
-              value={formData.director}
-              onChange={(e) => setFormData({ ...formData, director: e.target.value })}
-              margin="normal"
-              required
-            />
-            <TextField
-              fullWidth
-              label="Cast (comma-separated)"
-              value={formData.cast}
-              onChange={(e) => setFormData({ ...formData, cast: e.target.value })}
-              margin="normal"
-              required
-              helperText="Enter cast members separated by commas"
-            />
-            <TextField
-              fullWidth
-              label="Poster URL"
-              value={formData.posterUrl}
-              onChange={(e) => setFormData({ ...formData, posterUrl: e.target.value })}
-              margin="normal"
-              required
-              type="url"
-            />
-          </Box>
+          <MovieFormAdmin 
+            movieId={selectedMovie?._id} 
+            onSuccess={handleMovieFormSuccess} 
+          />
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseDialog}>Cancel</Button>
-          <Button onClick={handleSubmit} variant="contained">
-            {selectedMovie ? 'Update' : 'Create'}
-          </Button>
+          <Button onClick={handleCloseMovieDialog}>Cancel</Button>
         </DialogActions>
       </Dialog>
     </Container>
