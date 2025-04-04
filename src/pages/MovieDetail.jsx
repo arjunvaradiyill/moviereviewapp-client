@@ -22,6 +22,8 @@ import {
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import BookmarkAddIcon from '@mui/icons-material/BookmarkAdd';
+import BookmarkRemoveIcon from '@mui/icons-material/BookmarkRemove';
 import axios from '../utils/axios';
 import { useAuth } from '../context/AuthContext';
 
@@ -54,6 +56,8 @@ const MovieDetail = () => {
     message: '',
     severity: 'success'
   });
+  const [inWatchlist, setInWatchlist] = useState(false);
+  const [watchlistLoading, setWatchlistLoading] = useState(false);
 
   const fetchMovieDetails = useCallback(async () => {
     try {
@@ -95,10 +99,28 @@ const MovieDetail = () => {
     }
   }, [id, user]);
 
+  const checkWatchlistStatus = useCallback(async () => {
+    if (!user || !id) return;
+    
+    try {
+      setWatchlistLoading(true);
+      const response = await axios.get('/users/me/watchlist');
+      const isInWatchlist = response.data.some(movie => movie._id === id);
+      setInWatchlist(isInWatchlist);
+    } catch (error) {
+      console.error('Error checking watchlist status:', error);
+      // Don't set an error, just assume it's not in watchlist
+      setInWatchlist(false);
+    } finally {
+      setWatchlistLoading(false);
+    }
+  }, [id, user]);
+
   useEffect(() => {
     fetchMovieDetails();
     fetchReviews();
-  }, [fetchMovieDetails, fetchReviews]);
+    checkWatchlistStatus();
+  }, [fetchMovieDetails, fetchReviews, checkWatchlistStatus]);
 
   const handleSubmitReview = async (e) => {
     e.preventDefault();
@@ -231,6 +253,45 @@ const MovieDetail = () => {
     }
   };
 
+  const handleWatchlistToggle = async () => {
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+
+    setWatchlistLoading(true);
+    try {
+      if (inWatchlist) {
+        // Remove from watchlist
+        await axios.delete(`/users/me/watchlist/${id}`);
+        setInWatchlist(false);
+        setSnackbar({
+          open: true,
+          message: 'Removed from your watchlist',
+          severity: 'success'
+        });
+      } else {
+        // Add to watchlist
+        await axios.post(`/users/me/watchlist/${id}`);
+        setInWatchlist(true);
+        setSnackbar({
+          open: true,
+          message: 'Added to your watchlist',
+          severity: 'success'
+        });
+      }
+    } catch (error) {
+      console.error('Error updating watchlist:', error);
+      setSnackbar({
+        open: true,
+        message: error.response?.data?.message || 'Failed to update watchlist',
+        severity: 'error'
+      });
+    } finally {
+      setWatchlistLoading(false);
+    }
+  };
+
   const openEditDialog = (review) => {
     setSelectedReview(review);
     setEditingReview({
@@ -322,9 +383,27 @@ const MovieDetail = () => {
             <Typography variant="subtitle1" gutterBottom>
               Cast:
             </Typography>
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant="body2" color="text.secondary" gutterBottom>
               {movie.cast.join(', ')}
             </Typography>
+            
+            {user && (
+              <Button
+                variant="contained"
+                color={inWatchlist ? "error" : "primary"}
+                startIcon={inWatchlist ? <BookmarkRemoveIcon /> : <BookmarkAddIcon />}
+                onClick={handleWatchlistToggle}
+                disabled={watchlistLoading}
+                sx={{ mt: 2 }}
+              >
+                {watchlistLoading 
+                  ? 'Updating...' 
+                  : inWatchlist 
+                    ? 'Remove from Watchlist' 
+                    : 'Add to Watchlist'
+                }
+              </Button>
+            )}
           </Paper>
         </Grid>
 

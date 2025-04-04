@@ -121,6 +121,103 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const updateProfile = async (userData) => {
+    try {
+      const response = await axios.put('/users/me', userData);
+      
+      if (response.data) {
+        // Update user state with new data
+        const updatedUser = { ...user, ...response.data };
+        setUser(updatedUser);
+        
+        // Update localStorage
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        
+        return updatedUser;
+      }
+    } catch (error) {
+      console.error('Profile update error:', error);
+      if (error.response?.data?.message) {
+        throw new Error(error.response.data.message);
+      } else if (error.response?.status === 401) {
+        throw new Error('Authentication failed');
+      } else if (!error.response) {
+        throw new Error('Unable to connect to server. Please check your connection.');
+      } else {
+        throw new Error('Failed to update profile');
+      }
+    }
+  };
+
+  const updateProfilePicture = async (profilePicture) => {
+    try {
+      const response = await axios.put('/users/me/profile-picture', { profilePicture });
+      
+      if (response.data) {
+        // Update user state with new profile picture
+        const updatedUser = { ...user, ...response.data };
+        setUser(updatedUser);
+        
+        // Update localStorage
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        
+        return updatedUser;
+      }
+    } catch (error) {
+      console.error('Profile picture update error:', error);
+      if (error.response?.data?.message) {
+        throw new Error(error.response.data.message);
+      } else if (error.response?.status === 401) {
+        throw new Error('Authentication failed');
+      } else if (!error.response) {
+        throw new Error('Unable to connect to server. Please check your connection.');
+      } else {
+        throw new Error('Failed to update profile picture');
+      }
+    }
+  };
+
+  const uploadProfilePicture = async (file) => {
+    try {
+      // Create form data object
+      const formData = new FormData();
+      formData.append('profilePicture', file);
+      
+      // Configure the request to handle form data
+      const config = {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      };
+      
+      const response = await axios.post('/users/me/profile-picture/upload', formData, config);
+      
+      if (response.data) {
+        // Update user state with new profile picture URL
+        const updatedUser = { ...user, ...response.data };
+        setUser(updatedUser);
+        
+        // Update localStorage
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        
+        return updatedUser;
+      }
+    } catch (error) {
+      console.error('Profile picture upload error:', error);
+      if (error.response?.data?.message) {
+        throw new Error(error.response.data.message);
+      } else if (error.response?.status === 401) {
+        throw new Error('Authentication failed');
+      } else if (error.response?.status === 400) {
+        throw new Error('Invalid file. Please upload an image file under 5MB.');
+      } else if (!error.response) {
+        throw new Error('Unable to connect to server. Please check your connection.');
+      } else {
+        throw new Error('Failed to upload profile picture');
+      }
+    }
+  };
+
   const logout = () => {
     setToken(null);
     setUser(null);
@@ -129,7 +226,17 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, register, logout }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      token, 
+      login, 
+      register, 
+      logout,
+      setUser,
+      updateProfile,
+      updateProfilePicture,
+      uploadProfilePicture
+    }}>
       {children}
     </AuthContext.Provider>
   );

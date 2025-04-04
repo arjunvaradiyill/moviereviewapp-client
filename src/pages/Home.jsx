@@ -11,7 +11,6 @@ import {
   TextField,
   InputAdornment,
   IconButton,
-  useTheme,
   Paper,
   Divider,
   Skeleton,
@@ -31,7 +30,6 @@ const Home = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const theme = useTheme();
 
   useEffect(() => {
     fetchMovies();

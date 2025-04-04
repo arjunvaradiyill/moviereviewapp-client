@@ -13,6 +13,10 @@ import Register from './pages/Register';
 import MovieList from './pages/MovieList';
 import MovieDetail from './pages/MovieDetail';
 import AdminDashboard from './pages/AdminDashboard';
+import Watchlist from './pages/Watchlist';
+import Profile from './pages/Profile';
+import Settings from './pages/Settings';
+import MyReviews from './pages/MyReviews';
 
 const App = () => {
   return (
@@ -47,6 +51,38 @@ const App = () => {
             element={
               <PrivateRoute>
                 <MovieDetail />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/watchlist"
+            element={
+              <PrivateRoute>
+                <Watchlist />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <PrivateRoute>
+                <Profile />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/settings"
+            element={
+              <PrivateRoute>
+                <Settings />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/my-reviews"
+            element={
+              <PrivateRoute>
+                <MyReviews />
               </PrivateRoute>
             }
           />
