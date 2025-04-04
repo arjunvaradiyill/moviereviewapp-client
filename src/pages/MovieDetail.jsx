@@ -1080,14 +1080,27 @@ const MovieDetail = () => {
                   </Typography>
                   
                   {/* Add viewing indicator if appropriate */}
-                  {movie.releaseYear && movie.releaseYear >= new Date().getFullYear() && (
-                    <Box sx={{ mb: 2, display: 'flex', justifyContent: 'center' }}>
-                      <AnimatedBadge>
-                        <NewReleasesIcon fontSize="small" />
-                        Coming Soon
-                      </AnimatedBadge>
-                    </Box>
-                  )}
+                  {(() => {
+                    const currentDate = new Date();
+                    const currentYear = currentDate.getFullYear();
+                    const currentMonth = currentDate.getMonth() + 1; // JavaScript months are 0-indexed
+                    
+                    // Show Coming Soon badge if:
+                    // 1. Movie is in a future year OR
+                    // 2. Movie is in current year but future month
+                    const isComingSoon = 
+                      (movie.releaseYear > currentYear) || 
+                      (movie.releaseYear === currentYear && movie.releaseMonth > currentMonth);
+                    
+                    return isComingSoon && (
+                      <Box sx={{ mb: 2, display: 'flex', justifyContent: 'center' }}>
+                        <AnimatedBadge>
+                          <NewReleasesIcon fontSize="small" />
+                          Coming Soon
+                        </AnimatedBadge>
+                      </Box>
+                    );
+                  })()}
                   
                   <MovieBadge>
                     <PersonIcon />

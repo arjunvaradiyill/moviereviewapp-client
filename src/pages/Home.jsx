@@ -168,6 +168,20 @@ const Home = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Helper to format the release date with month and year
+  const formatReleaseDate = (month, year) => {
+    if (!year) return '';
+    
+    if (!month) return year.toString();
+    
+    const monthNames = [
+      'January', 'February', 'March', 'April', 'May', 'June', 
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    
+    return `${monthNames[month - 1]} ${year}`;
+  };
+
   // Fetch latest and upcoming movies
   useEffect(() => {
     const fetchMovies = async () => {
@@ -344,7 +358,7 @@ const Home = () => {
                   </Typography>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
                     <Typography variant="body2" color="text.secondary">
-                      {movie.releaseYear}
+                      {formatReleaseDate(movie.releaseMonth, movie.releaseYear)}
                     </Typography>
                     {movie.averageRating > 0 && (
                       <RatingChip 
@@ -423,7 +437,7 @@ const Home = () => {
               <Grid item xs={12} sm={6} md={3} key={movie._id}>
                 <MovieCard sx={{ position: 'relative' }}>
                   <UpcomingBadge>
-                    {movie.releaseYear}
+                    {formatReleaseDate(movie.releaseMonth, movie.releaseYear)}
                   </UpcomingBadge>
                   <Box sx={{ position: 'relative' }}>
                     <CardMedia
