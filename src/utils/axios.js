@@ -27,7 +27,6 @@ instance.interceptors.request.use(
     console.log('Making request to:', {
       url: config.url,
       method: config.method,
-      data: config.data,
       headers: config.headers,
       baseURL: config.baseURL,
       fullURL: `${config.baseURL}${config.url}`
@@ -45,30 +44,30 @@ instance.interceptors.response.use(
   (response) => {
     console.log('Response received:', {
       status: response.status,
-      data: response.data,
-      headers: response.headers,
-      url: response.config.url,
-      fullURL: `${response.config.baseURL}${response.config.url}`
+      statusText: response.statusText,
+      url: response.config.url
     });
     return response;
   },
   (error) => {
+    // Log the full error details for debugging
     console.error('Response error:', {
+      message: error.message,
       status: error.response?.status,
       statusText: error.response?.statusText,
       data: error.response?.data,
-      message: error.message,
       url: error.config?.url,
-      method: error.config?.method,
-      baseURL: error.config?.baseURL,
-      fullURL: `${error.config?.baseURL}${error.config?.url}`,
-      requestData: error.config?.data
+      method: error.config?.method
     });
     
+    // Handle authentication errors
     if (error.response?.status === 401) {
+      console.warn('Authentication token expired or invalid, redirecting to login');
       localStorage.removeItem('token');
+      localStorage.removeItem('user');
       window.location.href = '/login';
     }
+    
     return Promise.reject(error);
   }
 );

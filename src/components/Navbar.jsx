@@ -24,6 +24,7 @@ import BookmarkIcon from '@mui/icons-material/Bookmark';
 import LogoutIcon from '@mui/icons-material/Logout';
 import SettingsIcon from '@mui/icons-material/Settings';
 import PersonIcon from '@mui/icons-material/Person';
+import MovieIcon from '@mui/icons-material/Movie';
 
 const Navbar = () => {
   const { user, logout } = useAuth();
@@ -34,7 +35,7 @@ const Navbar = () => {
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    navigate('/');
     handleClose();
   };
 
@@ -62,21 +63,30 @@ const Navbar = () => {
         <Typography
           variant="h6"
           component={RouterLink}
-          to="/"
+          to={user ? "/home" : "/"}
           sx={{
             flexGrow: 1,
             textDecoration: 'none',
             color: 'inherit',
+            fontWeight: 'bold',
+            display: 'flex',
+            alignItems: 'center',
           }}
         >
-          Movie Review
+          <Box component="span" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <MovieIcon />
+            Movie Review Hub
+          </Box>
         </Typography>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <Button color="inherit" component={RouterLink} to="/movies">
-            Movies
-          </Button>
           {user ? (
             <>
+              <Button color="inherit" component={RouterLink} to="/home">
+                Home
+              </Button>
+              <Button color="inherit" component={RouterLink} to="/movies">
+                Movies
+              </Button>
               <Button 
                 color="inherit" 
                 component={RouterLink} 
@@ -84,6 +94,13 @@ const Navbar = () => {
                 startIcon={<BookmarkIcon />}
               >
                 Watchlist
+              </Button>
+              <Button 
+                color="inherit" 
+                component={RouterLink} 
+                to="/my-reviews"
+              >
+                My Reviews
               </Button>
               {user.role === 'admin' && (
                 <Chip
@@ -154,29 +171,38 @@ const Navbar = () => {
             </>
           ) : (
             <>
-              <Button color="inherit" component={RouterLink} to="/login">
+              <Button 
+                variant="contained" 
+                color="secondary" 
+                component={RouterLink} 
+                to="/register"
+                sx={{
+                  fontWeight: 'bold',
+                  borderRadius: 2,
+                  '&:hover': {
+                    transform: 'translateY(-2px)',
+                    boxShadow: '0 4px 10px rgba(0,0,0,0.15)',
+                  },
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                Sign Up
+              </Button>
+              <Button 
+                variant="outlined" 
+                color="inherit" 
+                component={RouterLink} 
+                to="/login"
+                sx={{
+                  fontWeight: 'bold',
+                  borderRadius: 2,
+                  '&:hover': {
+                    backgroundColor: 'rgba(255,255,255,0.1)',
+                  }
+                }}
+              >
                 Login
               </Button>
-              <Button color="inherit" component={RouterLink} to="/register">
-                Register
-              </Button>
-              <Chip
-                icon={<AdminPanelSettingsIcon />}
-                label="Admin Login"
-                component={RouterLink}
-                to="/login"
-                color="primary"
-                variant="outlined"
-                sx={{
-                  borderColor: 'primary.main',
-                  color: 'primary.main',
-                  '&:hover': {
-                    backgroundColor: 'primary.main',
-                    color: 'white',
-                  },
-                  textDecoration: 'none',
-                }}
-              />
             </>
           )}
           <Tooltip title={darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}>

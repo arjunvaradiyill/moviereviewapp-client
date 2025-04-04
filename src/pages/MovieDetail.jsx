@@ -645,15 +645,17 @@ const MovieDetail = () => {
     setIsMuted(!isMuted);
   }, [isMuted]);
 
-  // Auto-play trailer after a delay
+  // Auto-play trailer after delay if available
   useEffect(() => {
-    if (movie?.trailerUrl) {
-      const timer = setTimeout(() => {
+    let timer;
+    if (movie?.trailerUrl && getYoutubeVideoId(movie.trailerUrl)) {
+      timer = setTimeout(() => {
         setIsPlaying(true);
-      }, 2000); // 2 second delay before auto-playing
-      
-      return () => clearTimeout(timer);
+      }, 60000); // Change from 2000ms to 60000ms (1 minute)
     }
+    return () => {
+      clearTimeout(timer);
+    };
   }, [movie]);
 
   // Handle opening the full trailer dialog

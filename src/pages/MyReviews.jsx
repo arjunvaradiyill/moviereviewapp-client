@@ -125,15 +125,58 @@ const MyReviews = () => {
 
     try {
       setIsSubmitting(true);
-      await axios.delete(`/reviews/${selectedReview._id}`);
+      
+      // Make sure we're working with the actual review ID
+      const reviewId = selectedReview._id;
+      console.log('Attempting to delete review with ID:', reviewId);
+      
+      // Explicitly set the config to ensure headers are properly included
+      const config = {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      };
+      
+      // Use a more robust approach to make the delete request
+      const response = await axios.delete(`/reviews/${reviewId}`, config);
+      console.log('Delete response:', response.data);
       
       // Remove the review from the list
-      setReviews(reviews.filter(review => review._id !== selectedReview._id));
+      setReviews(reviews.filter(review => review._id !== reviewId));
       
+      // Show success message (replace error with success toast if possible)
+      setError('');
       handleCloseDeleteDialog();
     } catch (error) {
       console.error('Error deleting review:', error);
-      setError('Failed to delete review. Please try again.');
+      
+      // Enhanced error logging and handling
+      let errorMessage = 'Failed to delete review. Please try again.';
+      console.log('Error object structure:', JSON.stringify({
+        response: error.response ? {
+          status: error.response.status,
+          data: error.response.data
+        } : 'No response',
+        request: error.request ? 'Request exists' : 'No request',
+        message: error.message
+      }));
+      
+      if (error.response) {
+        console.log('Error response:', error.response.data);
+        
+        if (error.response.status === 404) {
+          errorMessage = 'Review not found. It may have been already deleted.';
+        } else if (error.response.status === 403) {
+          errorMessage = 'You are not authorized to delete this review.';
+        } else if (error.response.data && error.response.data.message) {
+          errorMessage = error.response.data.message;
+        }
+      } else if (error.request) {
+        errorMessage = 'No response from server. Please check your connection.';
+      }
+      
+      setError(errorMessage);
+      handleCloseDeleteDialog();
     } finally {
       setIsSubmitting(false);
     }
@@ -162,7 +205,11 @@ const MyReviews = () => {
       </Typography>
 
       {error && (
-        <Alert severity="error" sx={{ mb: 4 }}>
+        <Alert 
+          severity="error" 
+          sx={{ mb: 4 }}
+          onClose={() => setError('')}
+        >
           {error}
         </Alert>
       )}
@@ -195,16 +242,16 @@ const MyReviews = () => {
                     <CardMedia
                       component="img"
                       height="200"
-                      image={review.movie.posterUrl}
-                      alt={review.movie.title}
+                      image={review.movie && review.movie.posterUrl ? review.movie.posterUrl : 'https://via.placeholder.com/300x450?text=No+Poster'}
+                      alt={review.movie ? review.movie.title : 'Movie'}
                       sx={{ objectFit: 'cover' }}
                     />
                   </Grid>
                   <Grid item xs={12} sm={9}>
                     <CardContent>
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                        <Typography variant="h6" component={Link} to={`/movies/${review.movie._id}`} sx={{ textDecoration: 'none', color: 'inherit' }}>
-                          {review.movie.title}
+                        <Typography variant="h6" component={Link} to={review.movie ? `/movies/${review.movie._id}` : '#'} sx={{ textDecoration: 'none', color: 'inherit' }}>
+                          {review.movie ? review.movie.title : 'Unknown Movie'}
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
                           {new Date(review.createdAt).toLocaleDateString()}
@@ -306,8 +353,9 @@ const MyReviews = () => {
             color="error"
             variant="contained"
             disabled={isSubmitting}
+            startIcon={isSubmitting ? <CircularProgress size={20} color="inherit" /> : <DeleteIcon />}
           >
-            {isSubmitting ? <CircularProgress size={24} /> : 'Delete'}
+            {isSubmitting ? 'Deleting...' : 'Delete'}
           </Button>
         </DialogActions>
       </Dialog>

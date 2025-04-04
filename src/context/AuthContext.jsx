@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from '../utils/axios';
+import { useNavigate } from 'react-router-dom';
 
 const AuthContext = createContext();
 
@@ -14,6 +15,7 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Check for stored token on mount
@@ -28,41 +30,44 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      // Validate input
+      // Client-side validation
       if (!email || !password) {
         throw new Error('Email and password are required');
       }
 
-      // Format email to lowercase
-      const formattedEmail = email.toLowerCase().trim();
-
-      const response = await axios.post('/auth/login', {
-        email: formattedEmail,
-        password: password
-      });
-
-      if (!response.data || !response.data.token || !response.data.user) {
-        throw new Error('Invalid response from server');
+      const response = await axios.post('/auth/login', { email, password });
+      
+      if (response.status === 200 && response.data.token) {
+        // Store token and user data
+        localStorage.setItem('token', response.data.token);
+        localStorage.setItem('user', JSON.stringify(response.data.user));
+        
+        // Update context state
+        setToken(response.data.token);
+        setUser(response.data.user);
+        
+        // Navigate to the home page after successful login
+        navigate('/home');
+        
+        return response.data;
+      } else {
+        throw new Error('Invalid login response');
       }
-
-      const { token, user } = response.data;
-      setToken(token);
-      setUser(user);
-      localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(user));
     } catch (error) {
       console.error('Login error:', error);
-      if (error.response?.status === 400) {
-        throw new Error(error.response.data.message || 'Invalid credentials');
-      } else if (error.response?.status === 401) {
-        throw new Error('Authentication failed');
-      } else if (error.response?.status === 500) {
-        throw new Error('Server error. Please try again later.');
-      } else if (!error.response) {
-        throw new Error('Unable to connect to server. Please check your connection.');
-      } else {
-        throw new Error(error.message || 'Failed to login');
+      
+      if (error.response) {
+        // Handle different status codes
+        if (error.response.status === 401) {
+          throw new Error('Invalid credentials');
+        } else if (error.response.status === 404) {
+          throw new Error('User not found');
+        } else if (error.response.data && error.response.data.message) {
+          throw new Error(error.response.data.message);
+        }
       }
+      
+      throw new Error('Login failed. Please try again.');
     }
   };
 
