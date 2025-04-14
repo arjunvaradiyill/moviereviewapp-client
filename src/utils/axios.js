@@ -28,7 +28,7 @@ console.log('Using API URL:', baseURL);
 // Check server availability
 // eslint-disable-next-line no-unused-vars
 const checkServerAvailability = async (url) => {
-  // Simply return true - disable health checks as they're causing proxy errors
+  // Simply return true - disable server availability checks
   return true;
   
   // Original implementation commented out to preserve it
@@ -91,7 +91,7 @@ instance.defaults.raxConfig = {
     // Only retry GETs or specific non-mutation requests
     const isIdempotent = config.method === 'get' || 
       (config.url && (
-        // Don't include health endpoint that causes proxy errors
+        // Only include test endpoints
         config.url.includes('/api/test')
       ));
       

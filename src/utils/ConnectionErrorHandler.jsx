@@ -49,29 +49,13 @@ const ConnectionErrorHandler = () => {
       
       setChecking(true);
       try {
-        try {
-          // First, try the health endpoint
-          await axios.get('/health', { timeout: 8000 });
-          setConnectionError(false);
-          setErrorType('');
-          setColdStarting(false);
-          setRetryCount(0);
-          setDevServerMessage('');
-        } catch (initialError) {
-          // If health endpoint returns 404, try an alternative endpoint
-          if (initialError.response?.status === 404) {
-            console.log('Health endpoint not found, trying alternative endpoint');
-            // Try a fallback endpoint
-            await axios.get('/api/test', { timeout: 8000 });
-            setConnectionError(false);
-            setErrorType('');
-            setColdStarting(false);
-            setRetryCount(0);
-            setDevServerMessage('');
-          } else {
-            throw initialError; // Re-throw any other error to be handled below
-          }
-        }
+        // Try the API test endpoint
+        await axios.get('/api/test', { timeout: 8000 });
+        setConnectionError(false);
+        setErrorType('');
+        setColdStarting(false);
+        setRetryCount(0);
+        setDevServerMessage('');
       } catch (error) {
         console.error('Server connection error:', error);
         setConnectionError(true);
@@ -96,7 +80,7 @@ const ConnectionErrorHandler = () => {
           setErrorType('network');
           setColdStarting(false);
         } else if (error.response?.status === 404) {
-          // If both health and test endpoints are 404, check if server is actually up
+          // Check if server is actually up with a different endpoint
           try {
             await axios.get('/api/movies?limit=1', { timeout: 5000 });
             // If this succeeds, we're actually connected
@@ -162,7 +146,7 @@ const ConnectionErrorHandler = () => {
     if (errorType === 'coldstart' || retryCount > 1) {
       // Just trigger a connection check
       setChecking(true);
-      axios.get('/health', { timeout: 8000 })
+      axios.get('/api/test', { timeout: 8000 })
         .then(() => {
           setConnectionError(false);
           setColdStarting(false);
