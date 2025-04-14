@@ -39,9 +39,9 @@ export const AuthProvider = ({ children }) => {
       
       // Set a longer timeout specifically for login requests since they can take longer during cold starts
       const response = await axios.post('/auth/login', { email, password }, {
-        timeout: 20000, // 20 second timeout for login
+        timeout: 30000, // 30 second timeout for login in production
         retry: true,    // Enable retry for login
-        retryDelay: 2000, // Longer delay between retries
+        retryDelay: 3000, // Longer delay between retries
         maxRetries: 3   // More retries for login
       });
       

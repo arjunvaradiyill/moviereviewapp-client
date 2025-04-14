@@ -69,7 +69,7 @@ if (!isLocalhost && process.env.NODE_ENV === 'development') {
 const instance = axios.create({
   baseURL,
   withCredentials: true,
-  timeout: 10000, // 10 second timeout
+  timeout: 15000, // 15 second timeout for production
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json'
@@ -78,8 +78,8 @@ const instance = axios.create({
 
 // Add retry configuration 
 instance.defaults.raxConfig = {
-  retry: 2, // number of retries
-  retryDelay: 1000, // 1s between retries
+  retry: 3, // Increase retries for production
+  retryDelay: 2000, // 2s between retries
   // Only retry GET requests and timeouts
   shouldRetry: (error) => {
     const { config, code } = error;
@@ -198,4 +198,4 @@ instance.interceptors.response.use(
   }
 );
 
-export default instance; 
+export default instance;
