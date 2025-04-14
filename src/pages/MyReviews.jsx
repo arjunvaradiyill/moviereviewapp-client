@@ -90,8 +90,8 @@ const MyReviews = () => {
     setEditData({ ...editData, [name]: value });
   };
 
-  const handleRatingChange = (newValue) => {
-    setEditData({ ...editData, rating: newValue });
+  const handleRatingChange = (_, newValue) => {
+    setEditData({ ...editData, rating: newValue || 0 });
   };
 
   const handleSubmitEdit = async () => {
@@ -305,7 +305,7 @@ const MyReviews = () => {
               <Rating
                 name="rating"
                 value={editData.rating}
-                onChange={(event, newValue) => handleRatingChange(newValue)}
+                onChange={handleRatingChange}
                 precision={0.5}
               />
             </Box>

@@ -79,12 +79,43 @@ const AppRoutes = () => {
   );
 };
 
+// Add a DevelopmentBanner component to indicate when running in development mode
+const DevelopmentBanner = () => {
+  const isLocalhost = 
+    window.location.hostname === 'localhost' || 
+    window.location.hostname === '127.0.0.1';
+  
+  const isDevelopment = process.env.NODE_ENV === 'development';
+  
+  if (!isDevelopment) return null;
+  
+  return (
+    <Box 
+      sx={{ 
+        bgcolor: 'warning.main', 
+        color: 'warning.contrastText',
+        p: 0.5,
+        textAlign: 'center',
+        fontSize: '0.75rem',
+        fontWeight: 'bold',
+        position: 'fixed',
+        top: 0,
+        width: '100%',
+        zIndex: 9999,
+      }}
+    >
+      DEVELOPMENT MODE {isLocalhost ? '(localhost)' : '(remote)'}
+    </Box>
+  );
+};
+
 const App = () => {
   return (
     <ThemeProvider>
       <CssBaseline />
       <AuthProvider>
         <ConnectionErrorHandler />
+        <DevelopmentBanner />
         <AppRoutes />
       </AuthProvider>
     </ThemeProvider>

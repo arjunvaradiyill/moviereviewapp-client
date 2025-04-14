@@ -12,6 +12,13 @@ const ConnectionErrorHandler = () => {
   const [coldStarting, setColdStarting] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
   const [progress, setProgress] = useState(0);
+  const [devServerMessage, setDevServerMessage] = useState('');
+  
+  // Check if we're in development environment
+  const isDevelopment = process.env.NODE_ENV === 'development';
+  const isLocalhost = 
+    window.location.hostname === 'localhost' || 
+    window.location.hostname === '127.0.0.1';
   
   // Handle cold start detection
   useEffect(() => {
@@ -42,14 +49,40 @@ const ConnectionErrorHandler = () => {
       
       setChecking(true);
       try {
-        await axios.get('/health', { timeout: 8000 }); // Specific health endpoint with longer timeout
-        setConnectionError(false);
-        setErrorType('');
-        setColdStarting(false);
-        setRetryCount(0);
+        try {
+          // First, try the health endpoint
+          await axios.get('/health', { timeout: 8000 });
+          setConnectionError(false);
+          setErrorType('');
+          setColdStarting(false);
+          setRetryCount(0);
+          setDevServerMessage('');
+        } catch (initialError) {
+          // If health endpoint returns 404, try an alternative endpoint
+          if (initialError.response?.status === 404) {
+            console.log('Health endpoint not found, trying alternative endpoint');
+            // Try a fallback endpoint
+            await axios.get('/api/test', { timeout: 8000 });
+            setConnectionError(false);
+            setErrorType('');
+            setColdStarting(false);
+            setRetryCount(0);
+            setDevServerMessage('');
+          } else {
+            throw initialError; // Re-throw any other error to be handled below
+          }
+        }
       } catch (error) {
         console.error('Server connection error:', error);
         setConnectionError(true);
+        
+        // Special case for development environment
+        if (isDevelopment && isLocalhost) {
+          setErrorType('development');
+          setDevServerMessage('Make sure your API server is running on port 8000 (npm run server). The React client runs on port 3000 but connects to the API on port 8000.');
+          setColdStarting(false);
+          return;
+        }
         
         // Detect cold start scenario (timeout + retry pattern)
         if (error.code === 'ECONNABORTED' && error.message.includes('timeout')) {
@@ -63,13 +96,14 @@ const ConnectionErrorHandler = () => {
           setErrorType('network');
           setColdStarting(false);
         } else if (error.response?.status === 404) {
-          // If health endpoint doesn't exist, try another endpoint
+          // If both health and test endpoints are 404, check if server is actually up
           try {
             await axios.get('/api/movies?limit=1', { timeout: 5000 });
             // If this succeeds, we're actually connected
             setConnectionError(false);
             setColdStarting(false);
             setRetryCount(0);
+            setDevServerMessage('');
           } catch (fallbackError) {
             setErrorType('server');
             setColdStarting(false);
@@ -117,7 +151,7 @@ const ConnectionErrorHandler = () => {
       clearInterval(interval);
       axios.interceptors.response.eject(interceptor);
     };
-  }, [checking, connectionError, coldStarting, retryCount]);
+  }, [checking, connectionError, coldStarting, retryCount, isDevelopment, isLocalhost]);
   
   const handleRetry = () => {
     setRetryCount(prev => prev + 1);
@@ -147,6 +181,8 @@ const ConnectionErrorHandler = () => {
   
   const getErrorMessage = () => {
     switch (errorType) {
+      case 'development':
+        return 'API connection error in development mode.';
       case 'coldstart':
         return 'The server is starting up. This may take up to a minute...';
       case 'timeout':
@@ -161,6 +197,8 @@ const ConnectionErrorHandler = () => {
   
   const getErrorIcon = () => {
     switch (errorType) {
+      case 'development':
+        return <ErrorOutlineIcon />;
       case 'coldstart':
         return <AccessTimeIcon />;
       case 'network':
@@ -180,7 +218,7 @@ const ConnectionErrorHandler = () => {
       anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
     >
       <Alert 
-        severity={errorType === 'coldstart' ? 'info' : 'error'} 
+        severity={errorType === 'coldstart' ? 'info' : errorType === 'development' ? 'warning' : 'error'} 
         variant="filled"
         icon={getErrorIcon()}
         action={
@@ -209,6 +247,11 @@ const ConnectionErrorHandler = () => {
         }}
       >
         <Typography variant="body2">{getErrorMessage()}</Typography>
+        {devServerMessage && (
+          <Typography variant="caption" sx={{ mt: 1, fontSize: '0.7rem' }}>
+            {devServerMessage}
+          </Typography>
+        )}
         {errorType === 'coldstart' && (
           <Box sx={{ width: '100%', mt: 1 }}>
             <LinearProgress variant="determinate" value={progress} />

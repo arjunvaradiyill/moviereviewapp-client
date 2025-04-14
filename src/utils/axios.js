@@ -1,9 +1,69 @@
 import axios from 'axios';
 
-// Use environment variable for API URL with fallback
-const baseURL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+// Determine the environment
+const isLocalhost = 
+  window.location.hostname === 'localhost' || 
+  window.location.hostname === '127.0.0.1';
+
+// The client typically runs on port 3000, but the API server runs on port 8000 in development
+const API_PORT = 8000;
+const CLIENT_PORT = 3000;
+
+// Handle different development setups
+const getDevBaseUrl = () => {
+  // If running on localhost:3000, API is likely on localhost:8000
+  if (isLocalhost && window.location.port === `${CLIENT_PORT}`) {
+    return `http://localhost:${API_PORT}`;
+  }
+  // If running on a different port or the same port as API
+  return window.location.origin;
+};
+
+// Use environment variable for API URL with proper fallbacks
+const baseURL = process.env.REACT_APP_API_URL || 
+  (isLocalhost ? getDevBaseUrl() : 'https://movie-review-server.onrender.com');
 
 console.log('Using API URL:', baseURL);
+
+// Check server availability
+// eslint-disable-next-line no-unused-vars
+const checkServerAvailability = async (url) => {
+  // Simply return true - disable health checks as they're causing proxy errors
+  return true;
+  
+  // Original implementation commented out to preserve it
+  /*
+  try {
+    await fetch(`${url}/api/test`, { 
+      method: 'GET',
+      mode: 'no-cors',
+      timeout: 2000 
+    });
+    return true;
+  } catch (e) {
+    console.warn(`Server at ${url} not responding:`, e);
+    return false;
+  }
+  */
+};
+
+// Try to use local server if the remote one isn't responding and we're in development
+// Disable this functionality since it's causing proxy errors
+/*
+if (!isLocalhost && process.env.NODE_ENV === 'development') {
+  checkServerAvailability(baseURL).then(isAvailable => {
+    if (!isAvailable) {
+      console.warn('Remote server not responding, will try local server as fallback');
+      checkServerAvailability('http://localhost:3000').then(isLocalAvailable => {
+        if (isLocalAvailable) {
+          console.log('Local server is available, switching to it');
+          instance.defaults.baseURL = 'http://localhost:3000';
+        }
+      });
+    }
+  });
+}
+*/
 
 // Create a custom axios instance with retry capability
 const instance = axios.create({
@@ -31,7 +91,7 @@ instance.defaults.raxConfig = {
     // Only retry GETs or specific non-mutation requests
     const isIdempotent = config.method === 'get' || 
       (config.url && (
-        config.url.includes('/health') || 
+        // Don't include health endpoint that causes proxy errors
         config.url.includes('/api/test')
       ));
       
@@ -66,7 +126,7 @@ instance.interceptors.request.use(
     }
     
     // Handle API path
-    if (!config.url.startsWith('/api') && !config.url.startsWith('http') && !config.url.startsWith('/health')) {
+    if (!config.url.startsWith('/api') && !config.url.startsWith('http')) {
       config.url = `/api${config.url}`;
     }
     

@@ -148,19 +148,6 @@ const RatingChip = styled(Chip)(({ theme }) => ({
   }
 }));
 
-const UpcomingBadge = styled(Box)(({ theme }) => ({
-  position: 'absolute',
-  top: theme.spacing(2),
-  right: theme.spacing(2),
-  backgroundColor: alpha(theme.palette.error.main, 0.8),
-  color: theme.palette.common.white,
-  padding: `${theme.spacing(0.5)} ${theme.spacing(1.5)}`,
-  borderRadius: theme.shape.borderRadius * 5,
-  fontWeight: 'bold',
-  fontSize: '0.75rem',
-  zIndex: 2,
-}));
-
 // Timeline styled components
 const TimelineContainer = styled(Box)(({ theme }) => ({
   position: 'relative',
