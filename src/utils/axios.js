@@ -50,6 +50,18 @@ instance.interceptors.response.use(
       window.location.href = '/login';
     }
     
+    // Handle timeout errors
+    if (error.code === 'ECONNABORTED' && error.message.includes('timeout')) {
+      console.error('Request timed out. Please try again later.');
+      // You can dispatch an action to show a global notification here
+    }
+    
+    // Handle network errors
+    if (error.message === 'Network Error') {
+      console.error('Network error. Please check your internet connection.');
+      // You can dispatch an action to show a global notification here
+    }
+    
     return Promise.reject(error);
   }
 );
