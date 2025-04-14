@@ -126,7 +126,10 @@ instance.interceptors.request.use(
     }
     
     // Handle API path
-    if (!config.url.startsWith('/api') && !config.url.startsWith('http')) {
+    // Don't prepend /api if it's already there or it's a full URL or it contains /auth/
+    if (!config.url.startsWith('/api') && 
+        !config.url.startsWith('http') &&
+        !config.url.includes('/auth/')) {
       config.url = `/api${config.url}`;
     }
     
