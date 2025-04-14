@@ -56,8 +56,8 @@ export const AuthProvider = ({ children }) => {
         setToken(response.data.token);
         setUser(response.data.user);
         
-        // Navigate to the login success page after successful login
-        navigate('/login-success');
+        // Navigate to the home page after successful login
+        navigate('/');
         
         return response.data;
       } else {
