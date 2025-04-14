@@ -75,7 +75,7 @@ const Navbar = () => {
         >
           <Box component="span" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <MovieIcon />
-            Movie Review Hub
+            IFB
           </Box>
         </Typography>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>

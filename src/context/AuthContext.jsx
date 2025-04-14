@@ -35,7 +35,10 @@ export const AuthProvider = ({ children }) => {
         throw new Error('Email and password are required');
       }
 
+      console.log('Attempting login with:', { email });
+      
       const response = await axios.post('/auth/login', { email, password });
+      console.log('Login response:', response);
       
       if (response.status === 200 && response.data.token) {
         // Store token and user data
@@ -46,8 +49,8 @@ export const AuthProvider = ({ children }) => {
         setToken(response.data.token);
         setUser(response.data.user);
         
-        // Navigate to the home page after successful login
-        navigate('/home');
+        // Navigate to the login success page after successful login
+        navigate('/login-success');
         
         return response.data;
       } else {
@@ -55,6 +58,9 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (error) {
       console.error('Login error:', error);
+      console.error('Response details:', error.response?.data);
+      console.error('Request URL:', error.config?.url);
+      console.error('Server status code:', error.response?.status);
       
       if (error.response) {
         // Handle different status codes

@@ -1,9 +1,10 @@
 import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { CssBaseline, Box, styled } from '@mui/material';
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider } from './context/AuthContext';
 import { useAuth } from './context/AuthContext';
+import ConnectionErrorHandler from './utils/ConnectionErrorHandler';
 
 // Components
 import Navbar from './components/Navbar';
@@ -19,6 +20,7 @@ import Profile from './pages/Profile';
 import Settings from './pages/Settings';
 import MyReviews from './pages/MyReviews';
 import LandingPage from './pages/LandingPage';
+import LoginSuccess from './pages/LoginSuccess';
 
 // Styled component for the app layout
 const AppContainer = styled(Box)({
@@ -34,10 +36,12 @@ const MainContent = styled(Box)({
 // Create a wrapper component that uses the auth context
 const AppRoutes = () => {
   const { user } = useAuth();
+  const location = useLocation();
+  const hideNavAndFooter = location.pathname === '/login-success';
   
   return (
     <AppContainer>
-      <Navbar />
+      {!hideNavAndFooter && <Navbar />}
       <MainContent>
         <Routes>
           {/* Auth Routes - only accessible when logged out */}
@@ -59,6 +63,7 @@ const AppRoutes = () => {
               <Route path="/settings" element={<Settings />} />
               <Route path="/my-reviews" element={<MyReviews />} />
               <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/login-success" element={<LoginSuccess />} />
               
               {/* Redirect root and unknown paths to home when logged in */}
               <Route path="/" element={<Navigate to="/home" replace />} />
@@ -69,7 +74,7 @@ const AppRoutes = () => {
           )}
         </Routes>
       </MainContent>
-      <Footer />
+      {!hideNavAndFooter && <Footer />}
     </AppContainer>
   );
 };
@@ -79,6 +84,7 @@ const App = () => {
     <ThemeProvider>
       <CssBaseline />
       <AuthProvider>
+        <ConnectionErrorHandler />
         <AppRoutes />
       </AuthProvider>
     </ThemeProvider>

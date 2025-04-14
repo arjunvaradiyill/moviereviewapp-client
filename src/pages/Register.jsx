@@ -160,7 +160,7 @@ const Register = () => {
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 4 }}>
               <LocalMoviesIcon sx={{ fontSize: 40, mr: 2 }} />
               <Typography variant="h4" fontWeight="bold">
-                IFDB
+                IFB
               </Typography>
             </Box>
             <Typography variant="h3" fontWeight="bold" gutterBottom>

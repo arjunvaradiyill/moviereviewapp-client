@@ -84,7 +84,7 @@ const LandingPage = () => {
                   lineHeight: 1.1
                 }}
               >
-                Movie Review Hub
+                IFB
               </Typography>
               <Typography 
                 variant="h5"

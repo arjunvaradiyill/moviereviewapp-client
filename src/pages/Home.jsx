@@ -245,8 +245,9 @@ const Home = () => {
             component="h1" 
             gutterBottom 
             sx={{ 
-              fontWeight: 'bold',
-              background: 'linear-gradient(45deg, #ffffff 30%, #e3f2fd 90%)',
+              fontWeight: 900,
+              background: 'linear-gradient(45deg, #FF8E53 30%, #FE6B8B 90%)',
+              WebkitBackgroundClip: 'text',
               backgroundClip: 'text',
               textFillColor: 'transparent',
               mb: 2,
@@ -254,7 +255,7 @@ const Home = () => {
               textShadow: '0 5px 15px rgba(0,0,0,0.2)'
             }}
           >
-            Movie Review Hub
+            IFB
           </Typography>
           <Typography 
             variant="h6" 

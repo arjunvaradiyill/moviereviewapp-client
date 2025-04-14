@@ -19,6 +19,8 @@ import axios from '../utils/axios';
 import { useAuth } from '../context/AuthContext';
 
 const Watchlist = () => {
+  // We're using auth context to ensure the user is logged in, even if not directly using the user object
+  // eslint-disable-next-line no-unused-vars
   const { user } = useAuth();
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(true);
