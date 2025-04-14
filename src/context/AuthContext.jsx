@@ -37,7 +37,14 @@ export const AuthProvider = ({ children }) => {
 
       console.log('Attempting login with:', { email });
       
-      const response = await axios.post('/auth/login', { email, password });
+      // Set a longer timeout specifically for login requests since they can take longer during cold starts
+      const response = await axios.post('/auth/login', { email, password }, {
+        timeout: 20000, // 20 second timeout for login
+        retry: true,    // Enable retry for login
+        retryDelay: 2000, // Longer delay between retries
+        maxRetries: 3   // More retries for login
+      });
+      
       console.log('Login response:', response);
       
       if (response.status === 200 && response.data.token) {
@@ -62,7 +69,13 @@ export const AuthProvider = ({ children }) => {
       console.error('Request URL:', error.config?.url);
       console.error('Server status code:', error.response?.status);
       
-      if (error.response) {
+      if (error.code === 'ECONNABORTED' && error.message.includes('timeout')) {
+        // Handle timeout specifically
+        throw new Error('Login request timed out. The server might be starting up. Please try again in a moment.');
+      } else if (error.message === 'Network Error') {
+        // Handle network errors
+        throw new Error('Network error. Please check your internet connection and try again.');
+      } else if (error.response) {
         // Handle different status codes
         if (error.response.status === 401) {
           throw new Error('Invalid credentials');

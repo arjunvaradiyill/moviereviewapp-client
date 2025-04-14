@@ -23,6 +23,11 @@ instance.defaults.raxConfig = {
   // Only retry GET requests and timeouts
   shouldRetry: (error) => {
     const { config, code } = error;
+    // Check for custom retry options in the request config
+    if (config.retry === true) {
+      return true;
+    }
+    
     // Only retry GETs or specific non-mutation requests
     const isIdempotent = config.method === 'get' || 
       (config.url && (
@@ -47,6 +52,17 @@ instance.interceptors.request.use(
     const token = localStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+    }
+    
+    // Override timeout if specified
+    if (config.timeout) {
+      // config already has timeout set, don't modify
+    } else if (config.url && (
+      config.url.includes('/auth/login') || 
+      config.url.includes('/auth/register')
+    )) {
+      // Use longer timeout for auth operations
+      config.timeout = 20000; // 20 seconds
     }
     
     // Handle API path
@@ -100,8 +116,11 @@ instance.interceptors.response.use(
     isRetryActive = true;
     let retryCount = config.retryCount || 0;
     
+    // Get max retries, default to global setting or use custom maxRetries if provided
+    const maxRetries = config.maxRetries || instance.defaults.raxConfig.retry;
+    
     // Don't retry too many times
-    if (retryCount >= instance.defaults.raxConfig.retry) {
+    if (retryCount >= maxRetries) {
       isRetryActive = false;
       return Promise.reject(error);
     }
@@ -110,11 +129,11 @@ instance.interceptors.response.use(
     retryCount += 1;
     const newConfig = { ...config, retryCount };
     
-    // Delay the retry
-    const delay = instance.defaults.raxConfig.retryDelay;
+    // Delay the retry (use custom retryDelay if provided)
+    const delay = config.retryDelay || instance.defaults.raxConfig.retryDelay;
     await new Promise(resolve => setTimeout(resolve, delay));
     
-    console.log(`Retrying request (${retryCount}/${instance.defaults.raxConfig.retry}): ${newConfig.url}`);
+    console.log(`Retrying request (${retryCount}/${maxRetries}): ${newConfig.url}`);
     isRetryActive = false;
     return instance(newConfig);
   }

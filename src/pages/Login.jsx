@@ -12,9 +12,11 @@ import {
   IconButton,
   Link as MuiLink,
   useTheme,
-  useMediaQuery
+  useMediaQuery,
+  CircularProgress,
+  Collapse
 } from '@mui/material';
-import { Visibility, VisibilityOff } from '@mui/icons-material';
+import { Visibility, VisibilityOff, Info as InfoIcon } from '@mui/icons-material';
 import LocalMoviesIcon from '@mui/icons-material/LocalMovies';
 import StarIcon from '@mui/icons-material/Star';
 import { useAuth } from '../context/AuthContext';
@@ -26,6 +28,9 @@ const Login = () => {
     showPassword: false
   });
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [retry, setRetry] = useState(0);
+  const [serverInfo, setServerInfo] = useState('');
   const { login } = useAuth();
   const location = useLocation();
   const theme = useTheme();
@@ -53,12 +58,23 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setIsLoading(true);
+    setServerInfo('');
 
     try {
       await login(formData.email, formData.password);
     } catch (err) {
       console.error('Login error:', err);
+      
+      // Handle specific error types
+      if (err.message.includes('timed out') || err.message.includes('starting up')) {
+        setRetry(prev => prev + 1);
+        setServerInfo('The server is starting up. Free tier servers may take up to a minute to start after inactivity.');
+      }
+      
       setError(err.message || 'Failed to login');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -147,6 +163,11 @@ const Login = () => {
               {error}
             </Alert>
           )}
+          <Collapse in={Boolean(serverInfo)}>
+            <Alert severity="info" sx={{ mb: 2 }} icon={<InfoIcon />}>
+              {serverInfo}
+            </Alert>
+          </Collapse>
           <Box component="form" onSubmit={handleSubmit} noValidate>
             <TextField
               fullWidth
@@ -158,6 +179,7 @@ const Login = () => {
               required
               autoComplete="email"
               autoFocus={!formData.email}
+              disabled={isLoading}
             />
             <TextField
               fullWidth
@@ -169,6 +191,7 @@ const Login = () => {
               required
               autoComplete="current-password"
               autoFocus={Boolean(formData.email)}
+              disabled={isLoading}
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">
@@ -176,6 +199,7 @@ const Login = () => {
                       aria-label="toggle password visibility"
                       onClick={handleClickShowPassword}
                       edge="end"
+                      disabled={isLoading}
                     >
                       {formData.showPassword ? <VisibilityOff /> : <Visibility />}
                     </IconButton>
@@ -188,9 +212,17 @@ const Login = () => {
               fullWidth
               variant="contained"
               size="large"
-              sx={{ mt: 3 }}
+              sx={{ mt: 3, height: 56 }}
+              disabled={isLoading || !formData.email || !formData.password}
             >
-              Login
+              {isLoading ? (
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <CircularProgress size={24} sx={{ mr: 1 }} color="inherit" />
+                  {retry > 0 ? 'Retrying...' : 'Logging in...'}
+                </Box>
+              ) : (
+                'Login'
+              )}
             </Button>
             <Box sx={{ mt: 2, textAlign: 'center' }}>
               <Typography variant="body2">
