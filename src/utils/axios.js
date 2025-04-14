@@ -88,12 +88,8 @@ instance.defaults.raxConfig = {
       return true;
     }
     
-    // Only retry GETs or specific non-mutation requests
-    const isIdempotent = config.method === 'get' || 
-      (config.url && (
-        // Only include test endpoints
-        config.url.includes('/api/test')
-      ));
+    // Only retry GET requests
+    const isIdempotent = config.method === 'get';
       
     // Only retry timeouts and 5xx errors (not 4xx errors)
     const isTimeout = code === 'ECONNABORTED' && error.message.includes('timeout');

@@ -49,8 +49,8 @@ const ConnectionErrorHandler = () => {
       
       setChecking(true);
       try {
-        // Try the API test endpoint
-        await axios.get('/api/test', { timeout: 8000 });
+        // Try fetching main data instead of test endpoint
+        await axios.get('/api/movies?limit=1', { timeout: 8000 });
         setConnectionError(false);
         setErrorType('');
         setColdStarting(false);
@@ -79,19 +79,6 @@ const ConnectionErrorHandler = () => {
         } else if (error.message === 'Network Error') {
           setErrorType('network');
           setColdStarting(false);
-        } else if (error.response?.status === 404) {
-          // Check if server is actually up with a different endpoint
-          try {
-            await axios.get('/api/movies?limit=1', { timeout: 5000 });
-            // If this succeeds, we're actually connected
-            setConnectionError(false);
-            setColdStarting(false);
-            setRetryCount(0);
-            setDevServerMessage('');
-          } catch (fallbackError) {
-            setErrorType('server');
-            setColdStarting(false);
-          }
         } else {
           setErrorType('server');
           setColdStarting(false);
@@ -146,7 +133,7 @@ const ConnectionErrorHandler = () => {
     if (errorType === 'coldstart' || retryCount > 1) {
       // Just trigger a connection check
       setChecking(true);
-      axios.get('/api/test', { timeout: 8000 })
+      axios.get('/api/movies?limit=1', { timeout: 8000 })
         .then(() => {
           setConnectionError(false);
           setColdStarting(false);
