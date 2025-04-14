@@ -1,12 +1,39 @@
 import React, { useState, useEffect } from 'react';
-import { Alert, Snackbar, Button, CircularProgress, Box, Typography } from '@mui/material';
+import { Alert, Snackbar, Button, CircularProgress, Box, Typography, LinearProgress } from '@mui/material';
 import axios from './axios';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+import WifiOffIcon from '@mui/icons-material/WifiOff';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
 
 const ConnectionErrorHandler = () => {
   const [connectionError, setConnectionError] = useState(false);
   const [errorType, setErrorType] = useState('');
   const [checking, setChecking] = useState(false);
+  const [coldStarting, setColdStarting] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
+  const [progress, setProgress] = useState(0);
+  
+  // Handle cold start detection
+  useEffect(() => {
+    let progressTimer;
+    
+    if (coldStarting) {
+      setProgress(0);
+      progressTimer = setInterval(() => {
+        setProgress(prev => {
+          if (prev >= 100) {
+            clearInterval(progressTimer);
+            return 100;
+          }
+          return prev + 2; // Slowly increment progress (50 seconds to 100%)
+        });
+      }, 1000);
+    } else {
+      clearInterval(progressTimer);
+    }
+    
+    return () => clearInterval(progressTimer);
+  }, [coldStarting]);
   
   useEffect(() => {
     // Function to check server connection
@@ -15,20 +42,41 @@ const ConnectionErrorHandler = () => {
       
       setChecking(true);
       try {
-        await axios.get('/api/test', { timeout: 5000 }); // Shorter timeout for status check
+        await axios.get('/health', { timeout: 8000 }); // Specific health endpoint with longer timeout
         setConnectionError(false);
         setErrorType('');
+        setColdStarting(false);
+        setRetryCount(0);
       } catch (error) {
         console.error('Server connection error:', error);
         setConnectionError(true);
         
-        // Identify error type
+        // Detect cold start scenario (timeout + retry pattern)
         if (error.code === 'ECONNABORTED' && error.message.includes('timeout')) {
-          setErrorType('timeout');
+          if (retryCount >= 1) {
+            setColdStarting(true);
+            setErrorType('coldstart');
+          } else {
+            setErrorType('timeout');
+          }
         } else if (error.message === 'Network Error') {
           setErrorType('network');
+          setColdStarting(false);
+        } else if (error.response?.status === 404) {
+          // If health endpoint doesn't exist, try another endpoint
+          try {
+            await axios.get('/api/movies?limit=1', { timeout: 5000 });
+            // If this succeeds, we're actually connected
+            setConnectionError(false);
+            setColdStarting(false);
+            setRetryCount(0);
+          } catch (fallbackError) {
+            setErrorType('server');
+            setColdStarting(false);
+          }
         } else {
           setErrorType('server');
+          setColdStarting(false);
         }
       } finally {
         setChecking(false);
@@ -39,7 +87,12 @@ const ConnectionErrorHandler = () => {
     checkConnection();
     
     // Set up periodic connection checks
-    const interval = setInterval(checkConnection, 30000); // Check every 30 seconds
+    const interval = setInterval(() => {
+      // More frequent checks during cold start
+      if (coldStarting && !checking) {
+        checkConnection();
+      }
+    }, coldStarting ? 10000 : 30000); // Check every 10s during cold start or 30s normally
     
     // Add global axios error listener to detect new issues
     const interceptor = axios.interceptors.response.use(
@@ -50,7 +103,10 @@ const ConnectionErrorHandler = () => {
           (error.code === 'ECONNABORTED' && error.message.includes('timeout')) ||
           error.message === 'Network Error'
         ) {
-          checkConnection();
+          // Only trigger connection check if we haven't already identified a problem
+          if (!connectionError) {
+            checkConnection();
+          }
         }
         return Promise.reject(error);
       }
@@ -61,15 +117,38 @@ const ConnectionErrorHandler = () => {
       clearInterval(interval);
       axios.interceptors.response.eject(interceptor);
     };
-  }, [checking]);
+  }, [checking, connectionError, coldStarting, retryCount]);
   
   const handleRetry = () => {
+    setRetryCount(prev => prev + 1);
     setConnectionError(false);
-    window.location.reload();
+    
+    // If we're in a cold start situation and have retried several times,
+    // don't reload the page, just re-check the connection
+    if (errorType === 'coldstart' || retryCount > 1) {
+      // Just trigger a connection check
+      setChecking(true);
+      axios.get('/health', { timeout: 8000 })
+        .then(() => {
+          setConnectionError(false);
+          setColdStarting(false);
+          setRetryCount(0);
+          // Only reload if we're no longer in cold start
+          window.location.reload();
+        })
+        .catch(() => {
+          setConnectionError(true);
+          setChecking(false);
+        });
+    } else {
+      window.location.reload();
+    }
   };
   
   const getErrorMessage = () => {
     switch (errorType) {
+      case 'coldstart':
+        return 'The server is starting up. This may take up to a minute...';
       case 'timeout':
         return 'Request timed out. The server is taking too long to respond.';
       case 'network':
@@ -77,6 +156,17 @@ const ConnectionErrorHandler = () => {
       case 'server':
       default:
         return 'Server error. Please try again later.';
+    }
+  };
+  
+  const getErrorIcon = () => {
+    switch (errorType) {
+      case 'coldstart':
+        return <AccessTimeIcon />;
+      case 'network':
+        return <WifiOffIcon />;
+      default:
+        return <ErrorOutlineIcon />;
     }
   };
   
@@ -90,9 +180,9 @@ const ConnectionErrorHandler = () => {
       anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
     >
       <Alert 
-        severity="error" 
+        severity={errorType === 'coldstart' ? 'info' : 'error'} 
         variant="filled"
-        icon={<ErrorOutlineIcon />}
+        icon={getErrorIcon()}
         action={
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
             {checking ? (
@@ -112,11 +202,18 @@ const ConnectionErrorHandler = () => {
           alignItems: 'center',
           '& .MuiAlert-message': { 
             display: 'flex', 
-            alignItems: 'center' 
+            flexDirection: 'column',
+            alignItems: 'flex-start',
+            minWidth: '280px'
           }
         }}
       >
         <Typography variant="body2">{getErrorMessage()}</Typography>
+        {errorType === 'coldstart' && (
+          <Box sx={{ width: '100%', mt: 1 }}>
+            <LinearProgress variant="determinate" value={progress} />
+          </Box>
+        )}
       </Alert>
     </Snackbar>
   );
