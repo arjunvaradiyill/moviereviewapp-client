@@ -49,11 +49,12 @@ const ConnectionErrorHandler = () => {
       
       setChecking(true);
       try {
-        // Use a smaller endpoint to check connection
-        await axios.get('/api/movies?limit=1', { 
-          timeout: 10000,
+        // Use the movies endpoint directly - no health checks
+        await axios.get('/api/movies', { 
+          timeout: 15000,
           retry: true,
-          maxRetries: 2
+          maxRetries: 3,
+          params: { limit: 1 } // Use params instead of query string
         });
         setConnectionError(false);
         setErrorType('');
@@ -137,9 +138,11 @@ const ConnectionErrorHandler = () => {
     if (errorType === 'coldstart' || retryCount > 1) {
       // Just trigger a connection check
       setChecking(true);
-      axios.get('/api/movies?limit=1', { 
-        timeout: 10000,
-        retry: true 
+      axios.get('/api/movies', { 
+        timeout: 15000,
+        retry: true,
+        maxRetries: 3,
+        params: { limit: 1 } // Use params instead of query string
       })
         .then(() => {
           setConnectionError(false);

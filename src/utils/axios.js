@@ -118,17 +118,18 @@ instance.interceptors.request.use(
       config.url.includes('/auth/register')
     )) {
       // Use longer timeout for auth operations
-      config.timeout = 20000; // 20 seconds
+      config.timeout = 30000; // 30 seconds
     }
     
     // Handle API path
-    // Don't prepend /api if it's already there or it's a full URL or it contains /auth/
+    // Don't add /api prefix for auth endpoints
     if (!config.url.startsWith('/api') && 
-        !config.url.startsWith('http') &&
-        !config.url.includes('/auth/')) {
+        !config.url.startsWith('http') && 
+        !config.url.startsWith('/auth/')) {
       config.url = `/api${config.url}`;
     }
     
+    console.log('Final request URL:', config.url);
     return config;
   },
   (error) => {
