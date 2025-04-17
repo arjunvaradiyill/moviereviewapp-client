@@ -35,18 +35,26 @@ export const AuthProvider = ({ children }) => {
         throw new Error('Email and password are required');
       }
 
-      console.log('Attempting login with:', { email });
+      console.log('Attempting login...');
       
-      // Set a longer timeout specifically for login requests since they can take longer during cold starts
-      const response = await axios.post('/auth/login', { email, password }, {
-        timeout: 35000, // 35 second timeout for login in production
-        retry: true,    // Enable retry for login
-        retryDelay: 3000, // Longer delay between retries
-        maxRetries: 3,   // More retries for login
-        baseURL: process.env.REACT_APP_API_URL // Ensure we use the correct base URL
+      // Always use the local API server in development to avoid CORS
+      const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+      // In development, use the local server; in production, use the hosted server
+      const apiUrl = isLocalhost 
+        ? 'http://localhost:8000' 
+        : (process.env.REACT_APP_API_URL || 'https://movie-review-server.onrender.com');
+      
+      // Make direct request to auth endpoint
+      const response = await axios({
+        method: 'post',
+        url: '/api/auth/login',
+        baseURL: apiUrl,
+        data: { email, password },
+        withCredentials: isLocalhost ? true : false,
+        headers: {
+          'Content-Type': 'application/json'
+        }
       });
-      
-      console.log('Login response:', response);
       
       if (response.status === 200 && response.data.token) {
         // Store token and user data
@@ -57,8 +65,8 @@ export const AuthProvider = ({ children }) => {
         setToken(response.data.token);
         setUser(response.data.user);
         
-        // Navigate to the home page after successful login
-        navigate('/');
+        // Navigate directly to the home page after successful login
+        navigate('/home');
         
         return response.data;
       } else {
@@ -66,28 +74,18 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (error) {
       console.error('Login error:', error);
-      console.error('Response details:', error.response?.data);
-      console.error('Request URL:', error.config?.url);
-      console.error('Server status code:', error.response?.status);
       
-      if (error.code === 'ECONNABORTED' && error.message.includes('timeout')) {
-        // Handle timeout specifically
-        throw new Error('Login request timed out. The server might be starting up. Please try again in a moment.');
+      if (error.response?.status === 401) {
+        throw new Error('Invalid credentials');
+      } else if (error.response?.status === 404) {
+        throw new Error('User not found');
+      } else if (error.response?.data?.message) {
+        throw new Error(error.response.data.message);
       } else if (error.message === 'Network Error') {
-        // Handle network errors
         throw new Error('Network error. Please check your internet connection and try again.');
-      } else if (error.response) {
-        // Handle different status codes
-        if (error.response.status === 401) {
-          throw new Error('Invalid credentials');
-        } else if (error.response.status === 404) {
-          throw new Error('User not found');
-        } else if (error.response.data && error.response.data.message) {
-          throw new Error(error.response.data.message);
-        }
+      } else {
+        throw new Error('Login failed. Please try again.');
       }
-      
-      throw new Error('Login failed. Please try again.');
     }
   };
 
@@ -101,20 +99,30 @@ export const AuthProvider = ({ children }) => {
       // Format email to lowercase
       const formattedEmail = email.toLowerCase().trim();
       
-      console.log('Attempting registration with:', { username, email: formattedEmail });
+      console.log('Attempting registration...');
 
-      const response = await axios.post('/auth/register', {
-        username,
-        email: formattedEmail,
-        password,
-      }, {
-        timeout: 35000,
-        retry: true,
-        maxRetries: 3,
-        baseURL: process.env.REACT_APP_API_URL
+      // Always use the local API server in development to avoid CORS
+      const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+      // In development, use the local server; in production, use the hosted server
+      const apiUrl = isLocalhost 
+        ? 'http://localhost:8000' 
+        : (process.env.REACT_APP_API_URL || 'https://movie-review-server.onrender.com');
+      
+      // Make direct request to auth endpoint
+      const response = await axios({
+        method: 'post',
+        url: '/api/auth/register',
+        baseURL: apiUrl,
+        data: {
+          username,
+          email: formattedEmail,
+          password
+        },
+        withCredentials: isLocalhost ? true : false,
+        headers: {
+          'Content-Type': 'application/json'
+        }
       });
-
-      console.log('Registration response:', response.data);
 
       if (!response.data || !response.data.user) {
         throw new Error('Invalid response from server');
@@ -144,8 +152,8 @@ export const AuthProvider = ({ children }) => {
         throw new Error('User already exists');
       } else if (error.response?.status === 500) {
         throw new Error('Server error. Please try again later.');
-      } else if (!error.response) {
-        throw new Error('Unable to connect to server. Please check your connection.');
+      } else if (error.message === 'Network Error') {
+        throw new Error('Network error. Please check your connection.');
       } else {
         throw new Error(error.message || 'Failed to register');
       }
