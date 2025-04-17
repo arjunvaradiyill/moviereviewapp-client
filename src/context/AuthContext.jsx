@@ -37,12 +37,13 @@ export const AuthProvider = ({ children }) => {
 
       console.log('Attempting login...');
       
-      // Always use the local API server in development to avoid CORS
+      // Always use the API server based on environment
       const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-      // In development, use the local server; in production, use the hosted server
       const apiUrl = isLocalhost 
         ? 'http://localhost:8000' 
-        : (process.env.REACT_APP_API_URL || 'https://movie-review-server.onrender.com');
+        : (process.env.REACT_APP_API_URL || 'https://moviereviewapp-server.onrender.com');
+      
+      console.log('Login using API URL:', apiUrl);
       
       // Make direct request to auth endpoint
       const response = await axios({
@@ -50,7 +51,7 @@ export const AuthProvider = ({ children }) => {
         url: '/api/auth/login',
         baseURL: apiUrl,
         data: { email, password },
-        withCredentials: isLocalhost ? true : false,
+        withCredentials: false, // Disable withCredentials to avoid CORS issues
         headers: {
           'Content-Type': 'application/json'
         }
@@ -101,12 +102,13 @@ export const AuthProvider = ({ children }) => {
       
       console.log('Attempting registration...');
 
-      // Always use the local API server in development to avoid CORS
+      // Always use the API server based on environment
       const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-      // In development, use the local server; in production, use the hosted server
       const apiUrl = isLocalhost 
         ? 'http://localhost:8000' 
-        : (process.env.REACT_APP_API_URL || 'https://movie-review-server.onrender.com');
+        : (process.env.REACT_APP_API_URL || 'https://moviereviewapp-server.onrender.com');
+      
+      console.log('Register using API URL:', apiUrl);
       
       // Make direct request to auth endpoint
       const response = await axios({
@@ -118,7 +120,7 @@ export const AuthProvider = ({ children }) => {
           email: formattedEmail,
           password
         },
-        withCredentials: isLocalhost ? true : false,
+        withCredentials: false, // Disable withCredentials to avoid CORS issues
         headers: {
           'Content-Type': 'application/json'
         }

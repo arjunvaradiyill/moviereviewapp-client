@@ -1,21 +1,37 @@
 import axios from 'axios';
 
+// Define constants for ports
+const API_PORT = 8000;
+
 // Determine the environment
 const isLocalhost = 
   window.location.hostname === 'localhost' || 
   window.location.hostname === '127.0.0.1';
 
-// In development, use local API; in production, use the production API URL
-const baseURL = isLocalhost 
-  ? 'http://localhost:8000' 
-  : (process.env.REACT_APP_API_URL || 'https://movie-review-server.onrender.com');
+// Vercel-specific environment detection
+const isVercel = 
+  window.location.hostname.includes('vercel.app') || 
+  process.env.VERCEL || 
+  process.env.VERCEL_ENV;
 
-console.log('Using API URL:', baseURL);
+// In development, use local API; in production, use the production API URL
+const getDevBaseUrl = () => {
+  // Check if we are running locally
+  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+    return `http://localhost:${API_PORT}`;
+  }
+  // Default to the production URL if not running locally
+  return process.env.REACT_APP_API_URL || 'https://moviereviewapp-server.onrender.com';
+};
+
+const baseURL = getDevBaseUrl();
+
+console.log('Using API URL:', baseURL, 'Environment:', isLocalhost ? 'local' : (isVercel ? 'Vercel' : 'production'));
 
 // Create a simple axios instance without complex configurations
 const instance = axios.create({
   baseURL,
-  withCredentials: isLocalhost ? true : false, // Only use withCredentials in local development
+  withCredentials: false, // Disable withCredentials for all environments to avoid CORS issues
   timeout: 45000, // 45 second timeout for all requests
   headers: {
     'Content-Type': 'application/json',
@@ -32,7 +48,7 @@ instance.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
     
-    // Skip URL modification if the URL already contains auth/ as it now includes /api
+    // Skip URL modification if the URL already contains /api or is an external URL
     if (!config.url.startsWith('/api') && 
         !config.url.startsWith('http') && 
         !config.url.includes('://')) {
