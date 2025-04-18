@@ -26,34 +26,34 @@ export const ThemeProvider = ({ children }) => {
     palette: {
       mode: darkMode ? 'dark' : 'light',
       primary: {
-        main: '#FFC107',
-        light: '#FFD54F',
-        dark: '#FFA000',
+        main: '#3f51b5', // Indigo
+        light: '#757de8',
+        dark: '#002984',
       },
       secondary: {
-        main: '#212121',
-        light: '#484848',
-        dark: '#000000',
+        main: '#f50057', // Pink
+        light: '#ff5983',
+        dark: '#bb002f',
       },
       background: {
-        default: darkMode ? '#000000' : '#FFFDE7',
-        paper: darkMode ? '#212121' : '#FFFFFF',
+        default: darkMode ? '#121212' : '#f5f5f5',
+        paper: darkMode ? '#1e1e1e' : '#ffffff',
       },
       text: {
-        primary: darkMode ? '#FFC107' : '#212121',
-        secondary: darkMode ? '#FFD54F' : '#484848',
+        primary: darkMode ? '#ffffff' : '#212121',
+        secondary: darkMode ? '#b0b0b0' : '#757575',
       },
       error: {
-        main: '#F44336',
+        main: '#f44336', // Red
       },
       warning: {
-        main: '#FF9800',
+        main: '#ff9800', // Orange
       },
       info: {
-        main: '#03A9F4',
+        main: '#2196f3', // Blue
       },
       success: {
-        main: '#4CAF50',
+        main: '#4caf50', // Green
       },
     },
     typography: {
@@ -104,15 +104,17 @@ export const ThemeProvider = ({ children }) => {
       MuiAppBar: {
         styleOverrides: {
           root: {
-            backgroundColor: darkMode ? '#212121' : '#FFC107',
-            color: darkMode ? '#FFC107' : '#000000',
+            backgroundImage: darkMode 
+              ? 'linear-gradient(90deg, #002984 0%, #3f51b5 100%)' 
+              : 'linear-gradient(90deg, #3f51b5 0%, #757de8 100%)',
+            color: '#ffffff',
           },
         },
       },
       MuiButton: {
         styleOverrides: {
           containedPrimary: {
-            color: '#000000',
+            color: '#ffffff',
           },
         },
       },
