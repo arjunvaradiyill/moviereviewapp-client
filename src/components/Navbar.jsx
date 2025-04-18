@@ -203,6 +203,21 @@ const Navbar = () => {
               >
                 Login
               </Button>
+              <Button 
+                component={RouterLink} 
+                to="/login?admin=true"
+                color="inherit"
+                startIcon={<AdminPanelSettingsIcon />}
+                sx={{
+                  fontWeight: 'bold',
+                  borderRadius: 2,
+                  '&:hover': {
+                    backgroundColor: 'rgba(255,255,255,0.1)',
+                  }
+                }}
+              >
+                Admin
+              </Button>
             </>
           )}
           <Tooltip title={darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation, Link } from 'react-router-dom';
+import { useLocation, Link, useSearchParams } from 'react-router-dom';
 import {
   Container,
   Paper,
@@ -19,6 +19,7 @@ import {
 import { Visibility, VisibilityOff, Info as InfoIcon } from '@mui/icons-material';
 import LocalMoviesIcon from '@mui/icons-material/LocalMovies';
 import StarIcon from '@mui/icons-material/Star';
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import { useAuth } from '../context/AuthContext';
 
 const Login = () => {
@@ -31,8 +32,10 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [retry, setRetry] = useState(0);
   const [serverInfo, setServerInfo] = useState('');
-  const { login } = useAuth();
+  const { login, logout } = useAuth();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
+  const isAdminLogin = searchParams.get('admin') === 'true';
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
@@ -62,7 +65,14 @@ const Login = () => {
     setServerInfo('');
 
     try {
-      await login(formData.email, formData.password);
+      const result = await login(formData.email, formData.password);
+      
+      // If this is an admin login, check if the user has admin role
+      if (isAdminLogin && result && result.user && result.user.role !== 'admin') {
+        setError('You do not have administrator privileges. Please use the regular login.');
+        logout(); // Log the user out if they don't have admin privileges
+        return;
+      }
     } catch (err) {
       console.error('Login error:', err);
       
@@ -93,14 +103,16 @@ const Login = () => {
         <Box 
           sx={{ 
             flex: 1, 
-            bgcolor: 'primary.main', 
+            bgcolor: isAdminLogin ? 'secondary.dark' : 'primary.main', 
             color: 'white',
             p: 6,
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'center',
             position: 'relative',
-            background: 'linear-gradient(135deg, #6a1b9a 0%, #4a148c 100%)',
+            background: isAdminLogin 
+              ? 'linear-gradient(135deg, #303f9f 0%, #1a237e 100%)'  // Admin Blue
+              : 'linear-gradient(135deg, #6a1b9a 0%, #4a148c 100%)', // Regular Purple
           }}
         >
           <Box 
@@ -111,23 +123,31 @@ const Login = () => {
               width: '100%', 
               height: '100%', 
               opacity: 0.1,
-              backgroundImage: 'url("https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80")',
+              backgroundImage: isAdminLogin
+                ? 'url("https://images.unsplash.com/photo-1462899006636-339e08d1844e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80")'
+                : 'url("https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80")',
               backgroundSize: 'cover',
               backgroundPosition: 'center'
             }}
           />
           <Box sx={{ position: 'relative', zIndex: 1 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 4 }}>
-              <LocalMoviesIcon sx={{ fontSize: 40, mr: 2 }} />
+              {isAdminLogin 
+                ? <AdminPanelSettingsIcon sx={{ fontSize: 40, mr: 2 }} />
+                : <LocalMoviesIcon sx={{ fontSize: 40, mr: 2 }} />
+              }
               <Typography variant="h4" fontWeight="bold">
-                IFB
+                IFB {isAdminLogin && 'Admin'}
               </Typography>
             </Box>
             <Typography variant="h3" fontWeight="bold" gutterBottom>
-              Welcome Back!
+              {isAdminLogin ? 'Admin Portal' : 'Welcome Back!'}
             </Typography>
             <Typography variant="h6" sx={{ mb: 4, opacity: 0.9 }}>
-              Log in to access your personalized movie recommendations and continue sharing your reviews.
+              {isAdminLogin 
+                ? 'Log in to access administrative tools for managing movies, reviews, and users.' 
+                : 'Log in to access your personalized movie recommendations and continue sharing your reviews.'
+              }
             </Typography>
             <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
               {[1, 2, 3, 4, 5].map((star) => (
@@ -150,9 +170,12 @@ const Login = () => {
             justifyContent: 'center'
           }}
         >
-          <Typography variant="h4" component="h1" gutterBottom>
-            Login
-          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+            {isAdminLogin && <AdminPanelSettingsIcon color="primary" fontSize="large" />}
+            <Typography variant="h4" component="h1" gutterBottom>
+              {isAdminLogin ? 'Admin Login' : 'Login'}
+            </Typography>
+          </Box>
           {location.state?.message && (
             <Alert severity="success" sx={{ mb: 2 }}>
               {location.state.message}
@@ -161,6 +184,11 @@ const Login = () => {
           {error && (
             <Alert severity="error" sx={{ mb: 2 }}>
               {error}
+            </Alert>
+          )}
+          {isAdminLogin && (
+            <Alert severity="info" sx={{ mb: 2 }}>
+              This area is restricted to administrators only. If you're an admin, please enter your credentials.
             </Alert>
           )}
           <Collapse in={Boolean(serverInfo)}>
