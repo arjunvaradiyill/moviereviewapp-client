@@ -104,15 +104,15 @@ const Login = () => {
           sx={{ 
             flex: 1, 
             bgcolor: isAdminLogin ? 'secondary.dark' : 'primary.main', 
-            color: 'white',
+            color: isAdminLogin ? 'primary.main' : 'secondary.main',
             p: 6,
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'center',
             position: 'relative',
             background: isAdminLogin 
-              ? 'linear-gradient(135deg, #303f9f 0%, #1a237e 100%)'  // Admin Blue
-              : 'linear-gradient(135deg, #6a1b9a 0%, #4a148c 100%)', // Regular Purple
+              ? 'linear-gradient(135deg, #000000 0%, #212121 100%)'  // Admin Black
+              : 'linear-gradient(135deg, #FFA000 0%, #FFC107 100%)', // Regular Yellow
           }}
         >
           <Box 

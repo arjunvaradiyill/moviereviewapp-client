@@ -26,14 +26,34 @@ export const ThemeProvider = ({ children }) => {
     palette: {
       mode: darkMode ? 'dark' : 'light',
       primary: {
-        main: '#1976d2',
+        main: '#FFC107',
+        light: '#FFD54F',
+        dark: '#FFA000',
       },
       secondary: {
-        main: '#9c27b0',
+        main: '#212121',
+        light: '#484848',
+        dark: '#000000',
       },
       background: {
-        default: darkMode ? '#121212' : '#f5f5f5',
-        paper: darkMode ? '#1e1e1e' : '#ffffff',
+        default: darkMode ? '#000000' : '#FFFDE7',
+        paper: darkMode ? '#212121' : '#FFFFFF',
+      },
+      text: {
+        primary: darkMode ? '#FFC107' : '#212121',
+        secondary: darkMode ? '#FFD54F' : '#484848',
+      },
+      error: {
+        main: '#F44336',
+      },
+      warning: {
+        main: '#FF9800',
+      },
+      info: {
+        main: '#03A9F4',
+      },
+      success: {
+        main: '#4CAF50',
       },
     },
     typography: {
@@ -50,6 +70,60 @@ export const ThemeProvider = ({ children }) => {
       fontWeightRegular: 400,
       fontWeightMedium: 500,
       fontWeightBold: 700,
+      h1: {
+        fontWeight: 700,
+        letterSpacing: '-0.01562em',
+      },
+      h2: {
+        fontWeight: 700,
+        letterSpacing: '-0.00833em',
+      },
+      h3: {
+        fontWeight: 600,
+        letterSpacing: '0em',
+      },
+      h4: {
+        fontWeight: 600,
+        letterSpacing: '0.00735em',
+      },
+      h5: {
+        fontWeight: 500,
+        letterSpacing: '0em',
+      },
+      h6: {
+        fontWeight: 500,
+        letterSpacing: '0.0075em',
+      },
+      button: {
+        fontWeight: 600,
+        letterSpacing: '0.02857em',
+        textTransform: 'uppercase',
+      }
+    },
+    components: {
+      MuiAppBar: {
+        styleOverrides: {
+          root: {
+            backgroundColor: darkMode ? '#212121' : '#FFC107',
+            color: darkMode ? '#FFC107' : '#000000',
+          },
+        },
+      },
+      MuiButton: {
+        styleOverrides: {
+          containedPrimary: {
+            color: '#000000',
+          },
+        },
+      },
+      MuiCard: {
+        styleOverrides: {
+          root: {
+            borderRadius: 12,
+            boxShadow: darkMode ? '0 8px 16px rgba(0, 0, 0, 0.5)' : '0 8px 16px rgba(0, 0, 0, 0.1)',
+          },
+        },
+      },
     },
   });
 

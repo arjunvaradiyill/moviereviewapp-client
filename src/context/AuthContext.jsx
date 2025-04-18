@@ -44,6 +44,7 @@ export const AuthProvider = ({ children }) => {
         : 'https://entri-movie-server-0rwr.onrender.com';
       
       console.log('Login using API URL:', apiUrl);
+      console.log('Sending login request with email:', email);
       
       // Make direct request to auth endpoint
       const response = await axios({
@@ -56,6 +57,8 @@ export const AuthProvider = ({ children }) => {
           'Content-Type': 'application/json'
         }
       });
+      
+      console.log('Login response received:', response.status);
       
       if (response.status === 200 && response.data.token) {
         // Store token and user data
@@ -71,6 +74,7 @@ export const AuthProvider = ({ children }) => {
         
         return response.data;
       } else {
+        console.log('Invalid response format:', response.data);
         throw new Error('Invalid login response');
       }
     } catch (error) {
