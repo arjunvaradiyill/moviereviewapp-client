@@ -6,7 +6,7 @@
     },
     {
       "source": "/api/:path*",
-      "destination": "https://movie-review-server.onrender.com/api/:path*"
+      "destination": "https://entri-movie-server-0rwr.onrender.com/api/:path*"
     }
   ],
   "buildCommand": "npm run build",

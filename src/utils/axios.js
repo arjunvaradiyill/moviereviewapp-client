@@ -21,7 +21,7 @@ const getDevBaseUrl = () => {
     return `http://localhost:${API_PORT}`;
   }
   // Default to the production URL if not running locally
-  return process.env.REACT_APP_API_URL || 'https://moviereviewapp-server.onrender.com';
+  return 'https://entri-movie-server-0rwr.onrender.com';
 };
 
 const baseURL = getDevBaseUrl();

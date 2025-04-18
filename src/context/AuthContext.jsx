@@ -41,7 +41,7 @@ export const AuthProvider = ({ children }) => {
       const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
       const apiUrl = isLocalhost 
         ? 'http://localhost:8000' 
-        : (process.env.REACT_APP_API_URL || 'https://moviereviewapp-server.onrender.com');
+        : 'https://entri-movie-server-0rwr.onrender.com';
       
       console.log('Login using API URL:', apiUrl);
       
@@ -106,7 +106,7 @@ export const AuthProvider = ({ children }) => {
       const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
       const apiUrl = isLocalhost 
         ? 'http://localhost:8000' 
-        : (process.env.REACT_APP_API_URL || 'https://moviereviewapp-server.onrender.com');
+        : 'https://entri-movie-server-0rwr.onrender.com';
       
       console.log('Register using API URL:', apiUrl);
       
