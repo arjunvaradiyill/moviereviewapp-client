@@ -24,9 +24,40 @@ export const AuthProvider = ({ children }) => {
     
     if (storedToken && storedUser) {
       setToken(storedToken);
-      setUser(JSON.parse(storedUser));
+      try {
+        const userData = JSON.parse(storedUser);
+        // Ensure profilePicture exists even if null to avoid rendering issues
+        if (!userData.profilePicture) {
+          userData.profilePicture = '';
+        }
+        setUser(userData);
+      } catch (error) {
+        console.error('Error parsing stored user data:', error);
+        localStorage.removeItem('user');
+        localStorage.removeItem('token');
+      }
     }
   }, []);
+
+  // Add a function to fetch the latest user profile
+  const fetchUserProfile = async () => {
+    try {
+      const response = await axios.get('/users/me');
+      
+      if (response.data) {
+        // Update user state with complete user data
+        setUser(response.data);
+        
+        // Update localStorage
+        localStorage.setItem('user', JSON.stringify(response.data));
+        
+        return response.data;
+      }
+    } catch (error) {
+      console.error('Error fetching user profile:', error);
+      // Don't throw error to avoid disrupting login flow
+    }
+  };
 
   const login = async (email, password) => {
     try {
@@ -68,6 +99,9 @@ export const AuthProvider = ({ children }) => {
         // Update context state
         setToken(response.data.token);
         setUser(response.data.user);
+        
+        // Fetch the complete user profile to get the latest data
+        await fetchUserProfile();
         
         // Navigate directly to the home page after successful login
         navigate('/home');
@@ -280,7 +314,8 @@ export const AuthProvider = ({ children }) => {
       setUser,
       updateProfile,
       updateProfilePicture,
-      uploadProfilePicture
+      uploadProfilePicture,
+      fetchUserProfile
     }}>
       {children}
     </AuthContext.Provider>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import {
   AppBar,
@@ -27,11 +27,18 @@ import PersonIcon from '@mui/icons-material/Person';
 import MovieIcon from '@mui/icons-material/Movie';
 
 const Navbar = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, fetchUserProfile } = useAuth();
   const navigate = useNavigate();
   const { darkMode, toggleTheme } = useTheme();
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
+
+  // Refresh user profile when component mounts
+  useEffect(() => {
+    if (user) {
+      fetchUserProfile();
+    }
+  }, []);
 
   const handleLogout = () => {
     logout();
@@ -155,13 +162,15 @@ const Navbar = () => {
                       width: 32, 
                       height: 32,
                       bgcolor: user.role === 'admin' ? 'secondary.main' : 'primary.main',
+                      border: 2,
+                      borderColor: 'white',
                     }} 
-                    src={user.profilePicture}
+                    src={user?.profilePicture || ''}
                   >
-                    {user.profilePicture 
+                    {user?.profilePicture 
                       ? '' 
-                      : user && user.username && typeof user.username === 'string' && user.username.length > 0
-                        ? user.username[0].toUpperCase() 
+                      : user?.username && typeof user.username === 'string' && user.username.length > 0
+                        ? user.username.charAt(0).toUpperCase() 
                         : 'U'}
                   </Avatar>
                 </IconButton>
