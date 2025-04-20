@@ -89,30 +89,31 @@ const Login = () => {
   };
 
   return (
-    <Container maxWidth="lg" sx={{ py: 8 }}>
+    <Container maxWidth="lg" sx={{ py: { xs: 4, md: 8 } }}>
       <Paper 
-        elevation={3} 
+        elevation={0} 
         sx={{ 
           display: 'flex', 
           flexDirection: isMobile ? 'column' : 'row',
           overflow: 'hidden',
-          borderRadius: 2
+          borderRadius: 4,
+          border: '1px solid',
+          borderColor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.06)',
         }}
       >
         {/* Left Column - Content */}
         <Box 
           sx={{ 
             flex: 1, 
-            bgcolor: isAdminLogin ? 'secondary.dark' : 'primary.main', 
+            background: isAdminLogin 
+              ? 'linear-gradient(135deg, #F57C00 0%, #FF9800 100%)' 
+              : 'linear-gradient(135deg, #1976D2 0%, #2196F3 100%)',
             color: 'white',
-            p: 6,
+            p: { xs: 4, md: 6 },
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'center',
             position: 'relative',
-            background: isAdminLogin 
-              ? 'linear-gradient(135deg, #512DA8 0%, #673AB7 100%)'  // Admin Purple
-              : 'linear-gradient(135deg, #00796B 0%, #009688 100%)', // Regular Teal
           }}
         >
           <Box 
@@ -123,46 +124,33 @@ const Login = () => {
               width: '100%', 
               height: '100%', 
               opacity: 0.05,
-              backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5z' fill='%23ffffff' fill-opacity='1' fill-rule='evenodd'/%3E%3C/svg%3E")`,
-              backgroundSize: '24px 24px',
+              backgroundImage: `url("data:image/svg+xml,%3Csvg width='120' height='120' viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M9 0h2v20H9V0zm25.134.84l1.732 1-10 17.32-1.732-1 10-17.32zm-20 20l1.732 1-10 17.32-1.732-1 10-17.32zM58.16 4.134l1 1.732-17.32 10-1-1.732 17.32-10zm-40 40l1 1.732-17.32 10-1-1.732 17.32-10zM80 9v2H60V9h20zM20 69v2H0v-2h20zm79.32-55l-1 1.732-17.32-10L82 4l17.32 10zm-80 80l-1 1.732-17.32-10L2 84l17.32 10zm96.546-75.84l-1.732 1-10-17.32 1.732-1 10 17.32zm-100 100l-1.732 1-10-17.32 1.732-1 10 17.32zM38.16 24.134l1 1.732-17.32 10-1-1.732 17.32-10zM60 29v2H40v-2h20zm19.32 5l-1 1.732-17.32-10L62 24l17.32 10zm16.546 4.16l-1.732 1-10-17.32 1.732-1 10 17.32zM111 40h-2V20h2v20zm3.134.84l1.732 1-10 17.32-1.732-1 10-17.32zM40 49v2H20v-2h20zm19.32 5l-1 1.732-17.32-10L42 44l17.32 10zm-20 20l-1 1.732-17.32-10L22 64l17.32 10zm52.546-59.84l-1.732 1-10-17.32 1.732-1 10 17.32zm-40 40l-1.732 1-10-17.32 1.732-1 10 17.32zM91 60h-2V40h2v20zm3.134.84l1.732 1-10 17.32-1.732-1 10-17.32zm-60 10l1.732 1-10 17.32-1.732-1 10-17.32zM80 69v2H60v-2h20zm-20 20v2H40v-2h20zm39.32-15l-1 1.732-17.32-10L82 64l17.32 10zM100 89v2H80v-2h20zm19.32 5l-1 1.732-17.32-10L102 84l17.32 10z' fill='%23ffffff' fill-opacity='1' fill-rule='evenodd'/%3E%3C/svg%3E")`,
             }}
           />
           <Box sx={{ position: 'relative', zIndex: 1 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 4 }}>
               {isAdminLogin 
-                ? <AdminPanelSettingsIcon sx={{ fontSize: 40, mr: 2 }} />
-                : <LocalMoviesIcon sx={{ fontSize: 40, mr: 2 }} />
+                ? <AdminPanelSettingsIcon sx={{ fontSize: 36, mr: 1.5 }} />
+                : <LocalMoviesIcon sx={{ fontSize: 36, mr: 1.5 }} />
               }
-              <Typography variant="h4" fontWeight="bold" sx={{ 
-                backgroundImage: 'linear-gradient(90deg, #FFFFFF, rgba(255,255,255,0.7))',
-                backgroundClip: 'text',
-                WebkitBackgroundClip: 'text',
-                color: 'transparent',
-                WebkitTextFillColor: 'transparent',
-              }}>
+              <Typography variant="h4" fontWeight="bold">
                 {isAdminLogin ? 'MovieAura Admin' : 'MovieAura'}
               </Typography>
             </Box>
-            <Typography variant="h3" fontWeight="bold" gutterBottom sx={{ 
-              textShadow: '0 2px 10px rgba(0,0,0,0.1)',
-              mb: 2 
-            }}>
+            <Typography variant="h3" fontWeight="bold" gutterBottom sx={{ mb: 2 }}>
               {isAdminLogin ? 'Admin Portal' : 'Welcome Back!'}
             </Typography>
-            <Typography variant="h6" sx={{ mb: 4, opacity: 0.9, fontWeight: 'normal', maxWidth: '90%' }}>
+            <Typography variant="body1" sx={{ mb: 4, maxWidth: '90%', fontWeight: 400, fontSize: '1.1rem' }}>
               {isAdminLogin 
                 ? 'Log in to access administrative tools for managing movies, reviews, and users.' 
                 : 'Log in to access your personalized movie recommendations and continue sharing your reviews.'
               }
             </Typography>
-            <Box sx={{ display: 'flex', gap: 1, mb: 3 }}>
+            <Box sx={{ display: 'flex', gap: 0.75, mb: 3 }}>
               {[1, 2, 3, 4, 5].map((star) => (
-                <StarIcon key={star} sx={{ fontSize: 30, color: isAdminLogin ? '#9575CD' : '#4DB6AC' }} />
+                <StarIcon key={star} sx={{ fontSize: 28 }} />
               ))}
             </Box>
-            <Typography variant="body1" sx={{ opacity: 0.9, fontWeight: 300, letterSpacing: '0.015em' }}>
-              Join our community of movie enthusiasts and discover your next favorite film.
-            </Typography>
           </Box>
         </Box>
 
@@ -174,32 +162,28 @@ const Login = () => {
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'center',
-            position: 'relative',
           }}
         >
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
-            {isAdminLogin && <AdminPanelSettingsIcon color="secondary" fontSize="large" />}
-            <Typography variant="h4" component="h1" fontWeight="bold" color={isAdminLogin ? 'secondary.main' : 'primary.main'}>
-              {isAdminLogin ? 'Admin Login' : 'Login'}
-            </Typography>
-          </Box>
+          <Typography variant="h4" component="h1" fontWeight="bold" color={isAdminLogin ? 'secondary.main' : 'primary.main'} sx={{ mb: 3 }}>
+            {isAdminLogin ? 'Admin Login' : 'Login'}
+          </Typography>
           {location.state?.message && (
-            <Alert severity="success" sx={{ mb: 3, borderRadius: 2 }}>
+            <Alert severity="success" sx={{ mb: 3 }}>
               {location.state.message}
             </Alert>
           )}
           {error && (
-            <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>
+            <Alert severity="error" sx={{ mb: 3 }}>
               {error}
             </Alert>
           )}
           {isAdminLogin && (
-            <Alert severity="info" sx={{ mb: 3, borderRadius: 2 }}>
-              This area is restricted to administrators only. If you're an admin, please enter your credentials.
+            <Alert severity="info" sx={{ mb: 3 }}>
+              This area is restricted to administrators only.
             </Alert>
           )}
           <Collapse in={Boolean(serverInfo)}>
-            <Alert severity="info" sx={{ mb: 3, borderRadius: 2 }} icon={<InfoIcon />}>
+            <Alert severity="info" sx={{ mb: 3 }} icon={<InfoIcon />}>
               {serverInfo}
             </Alert>
           </Collapse>
@@ -208,9 +192,9 @@ const Login = () => {
             onSubmit={handleSubmit} 
             noValidate
             sx={{
-              '& .MuiTextField-root': {
-                mb: 2.5,
-              }
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 3
             }}
           >
             <TextField
@@ -223,9 +207,6 @@ const Login = () => {
               autoComplete="email"
               autoFocus={!formData.email}
               disabled={isLoading}
-              InputProps={{
-                sx: { borderRadius: 2 }
-              }}
             />
             <TextField
               fullWidth
@@ -238,7 +219,6 @@ const Login = () => {
               autoFocus={Boolean(formData.email)}
               disabled={isLoading}
               InputProps={{
-                sx: { borderRadius: 2 },
                 endAdornment: (
                   <InputAdornment position="end">
                     <IconButton
@@ -260,30 +240,21 @@ const Login = () => {
               size="large"
               color={isAdminLogin ? "secondary" : "primary"}
               sx={{ 
-                mt: 4, 
-                mb: 2,
-                height: 56,
-                borderRadius: 2,
-                boxShadow: 'none',
-                '&:hover': {
-                  boxShadow: isAdminLogin 
-                    ? '0 6px 16px rgba(103, 58, 183, 0.3)' 
-                    : '0 6px 16px rgba(0, 150, 136, 0.3)',
-                  transform: 'translateY(-2px)',
-                }
+                mt: 2,
+                height: 48,
               }}
               disabled={isLoading || !formData.email || !formData.password}
             >
               {isLoading ? (
                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                  <CircularProgress size={24} sx={{ mr: 1 }} color="inherit" />
+                  <CircularProgress size={20} sx={{ mr: 1 }} color="inherit" />
                   {retry > 0 ? 'Retrying...' : 'Logging in...'}
                 </Box>
               ) : (
                 'Login'
               )}
             </Button>
-            <Box sx={{ mt: 3, textAlign: 'center' }}>
+            <Box sx={{ mt: 2, textAlign: 'center' }}>
               <Typography variant="body2" color="text.secondary">
                 Don't have an account?{' '}
                 <MuiLink 

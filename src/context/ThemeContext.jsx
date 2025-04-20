@@ -26,50 +26,37 @@ export const ThemeProvider = ({ children }) => {
     palette: {
       mode: darkMode ? 'dark' : 'light',
       primary: {
-        main: '#009688', // Teal
-        light: '#4DB6AC',
-        dark: '#00796B',
+        main: '#2196F3', // Vibrant Blue
+        light: '#64B5F6',
+        dark: '#1976D2',
       },
       secondary: {
-        main: '#673AB7', // Purple
-        light: '#9575CD',
-        dark: '#512DA8',
+        main: '#FF9800', // Vibrant Orange
+        light: '#FFB74D',
+        dark: '#F57C00',
       },
       background: {
-        default: darkMode ? '#121212' : '#FAFAFA',
-        paper: darkMode ? '#1E1E1E' : '#FFFFFF',
+        default: darkMode ? '#121212' : '#f8f9fa',
+        paper: darkMode ? '#1e1e1e' : '#ffffff',
       },
       text: {
-        primary: darkMode ? '#FFFFFF' : '#212121',
-        secondary: darkMode ? '#B0B0B0' : '#757575',
-      },
-      error: {
-        main: '#E53935', // Red
-      },
-      warning: {
-        main: '#FFB300', // Amber
-      },
-      info: {
-        main: '#29B6F6', // Light Blue
-      },
-      success: {
-        main: '#66BB6A', // Green
+        primary: darkMode ? '#ffffff' : '#212121',
+        secondary: darkMode ? '#b0b0b0' : '#757575',
       },
     },
     typography: {
       fontFamily: [
-        'Poppins',
+        'Inter',
         '-apple-system',
         'BlinkMacSystemFont',
         '"Segoe UI"',
         'Roboto',
-        '"Helvetica Neue"',
         'Arial',
         'sans-serif',
       ].join(','),
       fontWeightLight: 300,
       fontWeightRegular: 400,
-      fontWeightMedium: 600,
+      fontWeightMedium: 500,
       fontWeightBold: 700,
       h1: {
         fontWeight: 700,
@@ -99,18 +86,20 @@ export const ThemeProvider = ({ children }) => {
         fontWeight: 600,
         letterSpacing: '0.02857em',
         textTransform: 'none',
-        borderRadius: 8,
       }
+    },
+    shape: {
+      borderRadius: 12
     },
     components: {
       MuiAppBar: {
         styleOverrides: {
           root: {
-            backgroundImage: darkMode 
-              ? 'linear-gradient(90deg, #00796B 0%, #009688 100%)' 
-              : 'linear-gradient(90deg, #009688 0%, #4DB6AC 100%)',
-            color: '#ffffff',
-            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
+            boxShadow: 'none',
+            borderBottom: '1px solid',
+            borderColor: darkMode ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.06)',
+            backgroundColor: darkMode ? '#1e1e1e' : '#ffffff',
+            color: darkMode ? '#ffffff' : '#212121',
           },
         },
       },
@@ -119,27 +108,31 @@ export const ThemeProvider = ({ children }) => {
           root: {
             borderRadius: 8,
             textTransform: 'none',
-            padding: '8px 16px',
+            padding: '10px 20px',
+            fontWeight: 500,
+            boxShadow: 'none',
+            '&:hover': {
+              boxShadow: 'none',
+            },
           },
           containedPrimary: {
-            color: '#ffffff',
-            boxShadow: '0 4px 12px rgba(0, 150, 136, 0.3)',
             '&:hover': {
-              boxShadow: '0 6px 16px rgba(0, 150, 136, 0.4)',
+              backgroundColor: '#42a5f5',
               transform: 'translateY(-2px)',
+              transition: 'all 0.2s',
             },
           },
           containedSecondary: {
-            boxShadow: '0 4px 12px rgba(103, 58, 183, 0.3)',
             '&:hover': {
-              boxShadow: '0 6px 16px rgba(103, 58, 183, 0.4)',
+              backgroundColor: '#ffa726',
               transform: 'translateY(-2px)',
+              transition: 'all 0.2s',
             },
           },
           outlined: {
-            borderWidth: 2,
+            borderWidth: 1.5,
             '&:hover': {
-              borderWidth: 2,
+              borderWidth: 1.5,
             },
           },
         },
@@ -148,12 +141,14 @@ export const ThemeProvider = ({ children }) => {
         styleOverrides: {
           root: {
             borderRadius: 16,
-            boxShadow: darkMode ? '0 8px 24px rgba(0, 0, 0, 0.5)' : '0 8px 24px rgba(0, 0, 0, 0.08)',
+            border: '1px solid',
+            borderColor: darkMode ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.06)',
+            boxShadow: 'none',
             overflow: 'hidden',
-            transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+            transition: 'transform 0.2s ease, box-shadow 0.2s ease',
             '&:hover': {
               transform: 'translateY(-4px)',
-              boxShadow: darkMode ? '0 12px 30px rgba(0, 0, 0, 0.6)' : '0 12px 30px rgba(0, 0, 0, 0.12)',
+              boxShadow: darkMode ? '0 8px 20px rgba(0, 0, 0, 0.4)' : '0 8px 20px rgba(0, 0, 0, 0.08)',
             },
           },
         },
@@ -163,6 +158,15 @@ export const ThemeProvider = ({ children }) => {
           root: {
             '& .MuiOutlinedInput-root': {
               borderRadius: 8,
+              '& fieldset': {
+                borderColor: darkMode ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.12)',
+              },
+              '&:hover fieldset': {
+                borderColor: darkMode ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.2)',
+              },
+            },
+            '& .MuiInputLabel-root': {
+              fontWeight: 500,
             },
           },
         },
@@ -171,6 +175,34 @@ export const ThemeProvider = ({ children }) => {
         styleOverrides: {
           rounded: {
             borderRadius: 16,
+          },
+          elevation1: {
+            boxShadow: 'none',
+            border: '1px solid',
+            borderColor: darkMode ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.06)',
+          },
+        },
+      },
+      MuiChip: {
+        styleOverrides: {
+          root: {
+            borderRadius: 8,
+            fontWeight: 500,
+          },
+        },
+      },
+      MuiAlert: {
+        styleOverrides: {
+          root: {
+            borderRadius: 8,
+          },
+        },
+      },
+      MuiAvatar: {
+        styleOverrides: {
+          root: {
+            border: '2px solid',
+            borderColor: darkMode ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.06)',
           },
         },
       },
