@@ -26,38 +26,39 @@ export const ThemeProvider = ({ children }) => {
     palette: {
       mode: darkMode ? 'dark' : 'light',
       primary: {
-        main: '#3f51b5', // Indigo
-        light: '#757de8',
-        dark: '#002984',
+        main: '#009688', // Teal
+        light: '#4DB6AC',
+        dark: '#00796B',
       },
       secondary: {
-        main: '#f50057', // Pink
-        light: '#ff5983',
-        dark: '#bb002f',
+        main: '#673AB7', // Purple
+        light: '#9575CD',
+        dark: '#512DA8',
       },
       background: {
-        default: darkMode ? '#121212' : '#f5f5f5',
-        paper: darkMode ? '#1e1e1e' : '#ffffff',
+        default: darkMode ? '#121212' : '#FAFAFA',
+        paper: darkMode ? '#1E1E1E' : '#FFFFFF',
       },
       text: {
-        primary: darkMode ? '#ffffff' : '#212121',
-        secondary: darkMode ? '#b0b0b0' : '#757575',
+        primary: darkMode ? '#FFFFFF' : '#212121',
+        secondary: darkMode ? '#B0B0B0' : '#757575',
       },
       error: {
-        main: '#f44336', // Red
+        main: '#E53935', // Red
       },
       warning: {
-        main: '#ff9800', // Orange
+        main: '#FFB300', // Amber
       },
       info: {
-        main: '#2196f3', // Blue
+        main: '#29B6F6', // Light Blue
       },
       success: {
-        main: '#4caf50', // Green
+        main: '#66BB6A', // Green
       },
     },
     typography: {
       fontFamily: [
+        'Poppins',
         '-apple-system',
         'BlinkMacSystemFont',
         '"Segoe UI"',
@@ -68,7 +69,7 @@ export const ThemeProvider = ({ children }) => {
       ].join(','),
       fontWeightLight: 300,
       fontWeightRegular: 400,
-      fontWeightMedium: 500,
+      fontWeightMedium: 600,
       fontWeightBold: 700,
       h1: {
         fontWeight: 700,
@@ -87,17 +88,18 @@ export const ThemeProvider = ({ children }) => {
         letterSpacing: '0.00735em',
       },
       h5: {
-        fontWeight: 500,
+        fontWeight: 600,
         letterSpacing: '0em',
       },
       h6: {
-        fontWeight: 500,
+        fontWeight: 600,
         letterSpacing: '0.0075em',
       },
       button: {
         fontWeight: 600,
         letterSpacing: '0.02857em',
-        textTransform: 'uppercase',
+        textTransform: 'none',
+        borderRadius: 8,
       }
     },
     components: {
@@ -105,24 +107,70 @@ export const ThemeProvider = ({ children }) => {
         styleOverrides: {
           root: {
             backgroundImage: darkMode 
-              ? 'linear-gradient(90deg, #002984 0%, #3f51b5 100%)' 
-              : 'linear-gradient(90deg, #3f51b5 0%, #757de8 100%)',
+              ? 'linear-gradient(90deg, #00796B 0%, #009688 100%)' 
+              : 'linear-gradient(90deg, #009688 0%, #4DB6AC 100%)',
             color: '#ffffff',
+            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
           },
         },
       },
       MuiButton: {
         styleOverrides: {
+          root: {
+            borderRadius: 8,
+            textTransform: 'none',
+            padding: '8px 16px',
+          },
           containedPrimary: {
             color: '#ffffff',
+            boxShadow: '0 4px 12px rgba(0, 150, 136, 0.3)',
+            '&:hover': {
+              boxShadow: '0 6px 16px rgba(0, 150, 136, 0.4)',
+              transform: 'translateY(-2px)',
+            },
+          },
+          containedSecondary: {
+            boxShadow: '0 4px 12px rgba(103, 58, 183, 0.3)',
+            '&:hover': {
+              boxShadow: '0 6px 16px rgba(103, 58, 183, 0.4)',
+              transform: 'translateY(-2px)',
+            },
+          },
+          outlined: {
+            borderWidth: 2,
+            '&:hover': {
+              borderWidth: 2,
+            },
           },
         },
       },
       MuiCard: {
         styleOverrides: {
           root: {
-            borderRadius: 12,
-            boxShadow: darkMode ? '0 8px 16px rgba(0, 0, 0, 0.5)' : '0 8px 16px rgba(0, 0, 0, 0.1)',
+            borderRadius: 16,
+            boxShadow: darkMode ? '0 8px 24px rgba(0, 0, 0, 0.5)' : '0 8px 24px rgba(0, 0, 0, 0.08)',
+            overflow: 'hidden',
+            transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+            '&:hover': {
+              transform: 'translateY(-4px)',
+              boxShadow: darkMode ? '0 12px 30px rgba(0, 0, 0, 0.6)' : '0 12px 30px rgba(0, 0, 0, 0.12)',
+            },
+          },
+        },
+      },
+      MuiTextField: {
+        styleOverrides: {
+          root: {
+            '& .MuiOutlinedInput-root': {
+              borderRadius: 8,
+            },
+          },
+        },
+      },
+      MuiPaper: {
+        styleOverrides: {
+          rounded: {
+            borderRadius: 16,
           },
         },
       },
