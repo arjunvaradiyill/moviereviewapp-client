@@ -38,7 +38,7 @@ const Navbar = () => {
     if (user) {
       fetchUserProfile();
     }
-  }, []);
+  }, [user, fetchUserProfile]);
 
   const handleLogout = () => {
     logout();

@@ -281,7 +281,7 @@ const Profile = () => {
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
           <Box sx={{ position: 'relative' }}>
             <Avatar
-              src={user.profilePicture}
+              src={user?.profilePicture || ''}
               sx={{
                 bgcolor: 'primary.main',
                 width: 80,
@@ -290,7 +290,7 @@ const Profile = () => {
                 mr: 3,
               }}
             >
-              {!user.profilePicture && user && user.username && typeof user.username === 'string' 
+              {(!user?.profilePicture || user.profilePicture === '') && user?.username && typeof user.username === 'string' 
                 ? user.username.charAt(0).toUpperCase() 
                 : 'U'}
             </Avatar>
@@ -458,14 +458,14 @@ const Profile = () => {
           
           <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3, mt: 2 }}>
             <Avatar
-              src={pictureUrl}
+              src={pictureUrl || ''}
               sx={{
                 width: 120,
                 height: 120,
                 fontSize: 60,
               }}
             >
-              {!pictureUrl && user && user.username && typeof user.username === 'string' 
+              {(!pictureUrl || pictureUrl === '') && user?.username && typeof user.username === 'string' 
                 ? user.username.charAt(0).toUpperCase() 
                 : 'U'}
             </Avatar>
