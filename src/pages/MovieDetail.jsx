@@ -1148,11 +1148,15 @@ const MovieDetail = () => {
                   </Typography>
                   
                   <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                    {movie.cast.map((actor, index) => (
+                    {movie.cast && movie.cast.map((actor, index) => (
                       <Chip
                         key={index}
-                        avatar={<Avatar sx={{ bgcolor: theme.palette.primary.main }}>{actor.charAt(0)}</Avatar>}
-                        label={actor}
+                        avatar={
+                          <Avatar sx={{ bgcolor: theme.palette.primary.main }}>
+                            {typeof actor === 'string' && actor.length > 0 ? actor.charAt(0) : '?'}
+                          </Avatar>
+                        }
+                        label={actor || 'Unknown'}
                         variant="outlined"
                         sx={{ mb: 1, transition: 'all 0.2s ease', '&:hover': { bgcolor: alpha(theme.palette.primary.main, 0.1) } }}
                       />
@@ -1367,11 +1371,13 @@ const MovieDetail = () => {
                           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                               <Avatar sx={{ bgcolor: theme.palette.primary.main, mr: 2, width: 48, height: 48 }}>
-                                {review.user.username.charAt(0).toUpperCase()}
+                                {review.user && review.user.username && typeof review.user.username === 'string' 
+                                  ? review.user.username.charAt(0).toUpperCase() 
+                                  : '?'}
                               </Avatar>
                               <Box>
                                 <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-                                  {review.user.username}
+                                  {review.user && review.user.username ? review.user.username : 'Anonymous'}
                                 </Typography>
                                 <Typography variant="body2" color="text.secondary">
                                   {new Date(review.createdAt).toLocaleDateString()}

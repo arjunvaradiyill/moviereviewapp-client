@@ -290,7 +290,9 @@ const Profile = () => {
                 mr: 3,
               }}
             >
-              {!user.profilePicture && user.username.charAt(0).toUpperCase()}
+              {!user.profilePicture && user && user.username && typeof user.username === 'string' 
+                ? user.username.charAt(0).toUpperCase() 
+                : 'U'}
             </Avatar>
             <IconButton 
               sx={{ 
@@ -463,7 +465,9 @@ const Profile = () => {
                 fontSize: 60,
               }}
             >
-              {!pictureUrl && user.username.charAt(0).toUpperCase()}
+              {!pictureUrl && user && user.username && typeof user.username === 'string' 
+                ? user.username.charAt(0).toUpperCase() 
+                : 'U'}
             </Avatar>
           </Box>
           

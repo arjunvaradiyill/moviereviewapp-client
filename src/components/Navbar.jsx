@@ -58,8 +58,8 @@ const Navbar = () => {
   };
 
   return (
-    <AppBar position="static">
-      <Toolbar>
+    <AppBar position="sticky" elevation={0}>
+      <Toolbar sx={{ py: 1 }}>
         <Typography
           variant="h6"
           component={RouterLink}
@@ -68,26 +68,29 @@ const Navbar = () => {
             flexGrow: 1,
             textDecoration: 'none',
             color: 'inherit',
-            fontWeight: 700,
+            fontWeight: 600,
             display: 'flex',
             alignItems: 'center',
-            fontSize: '1.5rem',
-            letterSpacing: '0.05em',
+            fontSize: '1.25rem',
+            letterSpacing: '0.01em',
           }}
         >
           <Box component="span" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <MovieIcon sx={{ fontSize: 28 }} />
+            <MovieIcon sx={{ fontSize: 26 }} />
             MovieAura
           </Box>
         </Typography>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 2 } }}>
           {user ? (
             <>
               <Button 
                 color="inherit" 
                 component={RouterLink} 
                 to="/home"
-                sx={{ fontWeight: 500 }}
+                sx={{ 
+                  fontWeight: 500,
+                  display: { xs: 'none', sm: 'inline-flex' }
+                }}
               >
                 Home
               </Button>
@@ -104,7 +107,10 @@ const Navbar = () => {
                 component={RouterLink} 
                 to="/watchlist"
                 startIcon={<BookmarkIcon />}
-                sx={{ fontWeight: 500 }}
+                sx={{ 
+                  fontWeight: 500,
+                  display: { xs: 'none', md: 'inline-flex' }
+                }}
               >
                 Watchlist
               </Button>
@@ -112,24 +118,25 @@ const Navbar = () => {
                 color="inherit" 
                 component={RouterLink} 
                 to="/my-reviews"
-                sx={{ fontWeight: 500 }}
+                sx={{ 
+                  fontWeight: 500,
+                  display: { xs: 'none', md: 'inline-flex' }
+                }}
               >
-                My Reviews
+                Reviews
               </Button>
               {user.role === 'admin' && (
                 <Chip
-                  icon={<AdminPanelSettingsIcon />}
+                  icon={<AdminPanelSettingsIcon fontSize="small" />}
                   label="Admin"
                   component={RouterLink}
                   to="/admin"
                   color="secondary"
+                  size="small"
                   sx={{
-                    fontWeight: 600,
-                    px: 1,
-                    '&:hover': {
-                      backgroundColor: 'secondary.dark',
-                    },
-                    textDecoration: 'none',
+                    fontWeight: 500,
+                    px: 0.5,
+                    height: 32
                   }}
                 />
               )}
@@ -137,28 +144,25 @@ const Navbar = () => {
                 <IconButton
                   onClick={handleProfileMenuOpen}
                   color="inherit"
-                  sx={{ 
-                    ml: 1,
-                    transition: 'transform 0.2s ease-in-out',
-                    '&:hover': {
-                      transform: 'scale(1.1)',
-                    }
-                  }}
+                  size="small"
+                  sx={{ ml: 1 }}
                   aria-controls={open ? 'profile-menu' : undefined}
                   aria-haspopup="true"
                   aria-expanded={open ? 'true' : undefined}
                 >
                   <Avatar 
                     sx={{ 
-                      width: 36, 
-                      height: 36, 
+                      width: 32, 
+                      height: 32,
                       bgcolor: user.role === 'admin' ? 'secondary.main' : 'primary.main',
-                      border: '2px solid',
-                      borderColor: 'background.paper',
                     }} 
                     src={user.profilePicture}
                   >
-                    {user.profilePicture ? '' : user.username ? user.username[0].toUpperCase() : 'U'}
+                    {user.profilePicture 
+                      ? '' 
+                      : user && user.username && typeof user.username === 'string' && user.username.length > 0
+                        ? user.username[0].toUpperCase() 
+                        : 'U'}
                   </Avatar>
                 </IconButton>
               </Tooltip>
@@ -172,6 +176,20 @@ const Navbar = () => {
                 }}
                 transformOrigin={{ horizontal: 'right', vertical: 'top' }}
                 anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+                PaperProps={{
+                  elevation: 0,
+                  sx: {
+                    border: '1px solid',
+                    borderColor: 'divider',
+                    borderRadius: 2,
+                    overflow: 'visible',
+                    mt: 1.5,
+                    '& .MuiMenuItem-root': {
+                      px: 2,
+                      py: 1,
+                    },
+                  },
+                }}
               >
                 <MenuItem onClick={handleClose} disabled sx={{ opacity: 1 }}>
                   <Typography variant="subtitle2">
@@ -189,7 +207,7 @@ const Navbar = () => {
                   <ListItemIcon>
                     <SettingsIcon fontSize="small" />
                   </ListItemIcon>
-                  Account Settings
+                  Settings
                 </MenuItem>
                 <Divider />
                 <MenuItem onClick={handleLogout}>
@@ -204,34 +222,27 @@ const Navbar = () => {
             <>
               <Button 
                 variant="contained" 
-                color="secondary" 
                 component={RouterLink} 
                 to="/register"
+                size="small"
+                color="secondary"
                 sx={{
-                  fontWeight: 600,
-                  borderRadius: 8,
-                  '&:hover': {
-                    transform: 'translateY(-2px)',
-                    boxShadow: '0 4px 10px rgba(0,0,0,0.15)',
-                  },
-                  transition: 'all 0.2s ease'
+                  fontWeight: 500,
+                  px: { xs: 2, sm: 3 },
+                  py: 0.75
                 }}
               >
                 Sign Up
               </Button>
               <Button 
                 variant="outlined" 
-                color="inherit" 
                 component={RouterLink} 
                 to="/login"
+                size="small"
                 sx={{
-                  fontWeight: 600,
-                  borderRadius: 8,
-                  borderWidth: 2,
-                  '&:hover': {
-                    borderWidth: 2,
-                    backgroundColor: 'rgba(255,255,255,0.1)',
-                  }
+                  fontWeight: 500,
+                  px: { xs: 2, sm: 3 },
+                  py: 0.75
                 }}
               >
                 Login
@@ -240,25 +251,20 @@ const Navbar = () => {
                 component={RouterLink} 
                 to="/login?admin=true"
                 color="inherit"
+                size="small"
                 startIcon={<AdminPanelSettingsIcon />}
                 sx={{
-                  fontWeight: 600,
-                  borderRadius: 8,
-                  bgcolor: 'rgba(103, 58, 183, 0.1)',
-                  '&:hover': {
-                    bgcolor: 'rgba(103, 58, 183, 0.2)',
-                    transform: 'translateY(-2px)',
-                  },
-                  transition: 'all 0.2s ease'
+                  display: { xs: 'none', sm: 'inline-flex' },
+                  fontWeight: 500,
                 }}
               >
                 Admin
               </Button>
             </>
           )}
-          <Tooltip title={darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}>
-            <IconButton color="inherit" onClick={toggleTheme}>
-              {darkMode ? <Brightness7Icon /> : <Brightness4Icon />}
+          <Tooltip title={darkMode ? 'Light mode' : 'Dark mode'}>
+            <IconButton size="small" color="inherit" onClick={toggleTheme}>
+              {darkMode ? <Brightness7Icon fontSize="small" /> : <Brightness4Icon fontSize="small" />}
             </IconButton>
           </Tooltip>
         </Box>
