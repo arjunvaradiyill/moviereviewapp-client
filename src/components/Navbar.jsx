@@ -229,7 +229,8 @@ const Navbar = () => {
                 sx={{
                   fontWeight: 500,
                   px: { xs: 2, sm: 3 },
-                  py: 0.75
+                  py: 0.75,
+                  color: 'white'
                 }}
               >
                 Sign Up
@@ -239,10 +240,16 @@ const Navbar = () => {
                 component={RouterLink} 
                 to="/login"
                 size="small"
+                color="inherit"
                 sx={{
                   fontWeight: 500,
                   px: { xs: 2, sm: 3 },
-                  py: 0.75
+                  py: 0.75,
+                  borderColor: 'text.primary',
+                  '&:hover': {
+                    borderColor: 'text.primary',
+                    bgcolor: 'rgba(255,255,255,0.1)'
+                  }
                 }}
               >
                 Login
