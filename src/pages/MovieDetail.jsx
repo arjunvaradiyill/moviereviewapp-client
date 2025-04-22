@@ -26,6 +26,7 @@ import {
   Tooltip,
   Card,
   CardContent,
+  Stack,
 } from '@mui/material';
 import { styled, alpha } from '@mui/material/styles';
 import EditIcon from '@mui/icons-material/Edit';
@@ -42,9 +43,9 @@ import NewReleasesIcon from '@mui/icons-material/NewReleases';
 import axios from '../utils/axios';
 import { useAuth } from '../context/AuthContext';
 import ReactPlayer from 'react-player/youtube';
-import PlayCircleFilledIcon from '@mui/icons-material/PlayCircleFilled';
 import VolumeUpIcon from '@mui/icons-material/VolumeUp';
 import VolumeOffIcon from '@mui/icons-material/VolumeOff';
+import PauseIcon from '@mui/icons-material/Pause';
 
 // Styled components for enhanced UI
 const BannerOverlay = styled(Box)(({ theme }) => ({
@@ -266,23 +267,50 @@ const VideoPlayerWrapper = styled(Box)(({ theme }) => ({
 }));
 
 // Add a component for video controls
-const VideoControls = styled(Box)(({ theme }) => ({
-  position: 'absolute',
-  bottom: '20%',
-  right: theme.spacing(3),
-  zIndex: 10,
-  display: 'flex',
-  gap: theme.spacing(2),
-}));
+const VideoControls = ({ isPlaying, isMuted, onPlayPause, onMute }) => (
+  <Box sx={{ 
+    position: 'absolute', 
+    bottom: 20, 
+    left: 0, 
+    right: 0, 
+    display: 'flex', 
+    justifyContent: 'space-between',
+    px: 3,
+    alignItems: 'center',
+    zIndex: 3
+  }}>
+    <IconButton 
+      onClick={onPlayPause} 
+      sx={{ 
+        color: 'white', 
+        bgcolor: 'rgba(0,0,0,0.6)', 
+        '&:hover': { bgcolor: 'rgba(0,0,0,0.8)' } 
+      }}
+    >
+      {isPlaying ? <PauseIcon /> : <PlayArrowIcon />}
+    </IconButton>
+    
+    <IconButton 
+      onClick={onMute} 
+      sx={{ 
+        color: 'white', 
+        bgcolor: 'rgba(0,0,0,0.6)', 
+        '&:hover': { bgcolor: 'rgba(0,0,0,0.8)' } 
+      }}
+    >
+      {isMuted ? <VolumeOffIcon /> : <VolumeUpIcon />}
+    </IconButton>
+  </Box>
+);
 
-const IconControlButton = styled(IconButton)(({ theme }) => ({
-  backgroundColor: alpha(theme.palette.common.black, 0.5),
-  color: theme.palette.common.white,
-  '&:hover': {
-    backgroundColor: alpha(theme.palette.common.black, 0.7),
-  },
-  transition: 'all 0.2s ease',
-}));
+// Helper to extract YouTube video ID from URL
+const getYoutubeVideoId = (url) => {
+  if (!url) return null;
+  
+  const regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
+  const match = url.match(regExp);
+  return (match && match[7].length === 11) ? match[7] : null;
+};
 
 const MovieDetail = () => {
   const { id } = useParams();
@@ -319,18 +347,6 @@ const MovieDetail = () => {
   });
   const [inWatchlist, setInWatchlist] = useState(false);
   const [watchlistLoading, setWatchlistLoading] = useState(false);
-  // Add state for video player
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [isMuted, setIsMuted] = useState(true);
-
-  // Helper to extract YouTube video ID from URL
-  const getYoutubeVideoId = (url) => {
-    if (!url) return null;
-    
-    const regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
-    const match = url.match(regExp);
-    return (match && match[7].length === 11) ? match[7] : null;
-  };
 
   const fetchMovieDetails = useCallback(async () => {
     try {
@@ -635,35 +651,12 @@ const MovieDetail = () => {
     setDeleteDialogOpen(true);
   };
 
-  // Toggle play/pause for trailer in banner
-  const togglePlayback = useCallback(() => {
-    setIsPlaying(!isPlaying);
-  }, [isPlaying]);
-
-  // Toggle mute/unmute for trailer
-  const toggleMute = useCallback(() => {
-    setIsMuted(!isMuted);
-  }, [isMuted]);
-
-  // Auto-play trailer after delay if available
-  useEffect(() => {
-    let timer;
-    if (movie?.trailerUrl && getYoutubeVideoId(movie.trailerUrl)) {
-      timer = setTimeout(() => {
-        setIsPlaying(true);
-      }, 60000); // Change from 2000ms to 60000ms (1 minute)
-    }
-    return () => {
-      clearTimeout(timer);
-    };
-  }, [movie]);
-
-  // Handle opening the full trailer dialog
-  const handleOpenTrailer = useCallback(() => {
-    setIsPlaying(false); // Pause banner video when opening dialog
+  // Handle opening the trailer dialog
+  const handleOpenTrailer = () => {
     setTrailerDialogOpen(true);
-  }, []);
+  };
 
+  // Handle closing the trailer dialog
   const handleCloseTrailer = () => {
     setTrailerDialogOpen(false);
   };
@@ -736,8 +729,8 @@ const MovieDetail = () => {
                     url={`https://www.youtube.com/watch?v=${getYoutubeVideoId(movie.trailerUrl)}`}
                     width="100%"
                     height="100%"
-                    playing={isPlaying}
-                    muted={isMuted}
+                    playing={true}
+                    muted={true}
                     loop={true}
                     config={{
                       youtube: {
@@ -758,34 +751,25 @@ const MovieDetail = () => {
                 </VideoPlayerWrapper>
                 
                 {/* Video controls */}
-                <VideoControls>
-                  <IconControlButton onClick={togglePlayback} aria-label={isPlaying ? "Pause trailer" : "Play trailer"}>
-                    <PlayCircleFilledIcon fontSize="large" />
-                  </IconControlButton>
-                  <IconControlButton onClick={toggleMute} aria-label={isMuted ? "Unmute trailer" : "Mute trailer"}>
-                    {isMuted ? <VolumeOffIcon fontSize="large" /> : <VolumeUpIcon fontSize="large" />}
-                  </IconControlButton>
-                </VideoControls>
+                <VideoControls isPlaying={true} isMuted={true} onPlayPause={() => {}} onMute={() => {}} />
                 
                 {/* Fallback banner image while video loads or if paused */}
-                {!isPlaying && (
-                  <Box
-                    component="img"
-                    src={movie.bannerUrl}
-                    alt={`${movie.title} banner`}
-                    sx={{
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'cover',
-                      objectPosition: 'center',
-                      filter: 'brightness(0.65)',
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      zIndex: 1,
-                    }}
-                  />
-                )}
+                <Box
+                  component="img"
+                  src={movie.bannerUrl}
+                  alt={`${movie.title} banner`}
+                  sx={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    objectPosition: 'center',
+                    filter: 'brightness(0.65)',
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    zIndex: 1,
+                  }}
+                />
               </>
             ) : (
               /* Regular banner image if no trailer */
@@ -836,44 +820,48 @@ const MovieDetail = () => {
                 </Box>
               </Box>
               <Box sx={{ display: 'flex', gap: 2, alignSelf: 'flex-end', zIndex: 10 }}>
-                {movie.trailerUrl && (
-                  <GradientButton
+                <Stack 
+                  direction="row" 
+                  spacing={2} 
+                  sx={{ mt: 3 }}
+                >
+                  <Button
                     variant="contained"
-                    colorstart="#e50914"
-                    colorend="#b71c1c"
+                    color="secondary"
                     startIcon={<PlayArrowIcon />}
                     onClick={handleOpenTrailer}
-                    size="large"
                     sx={{ 
-                      fontWeight: 'bold',
-                      py: 1.5,
-                      px: 3,
-                      animation: 'pulse 2s infinite'
+                      borderRadius: 2,
+                      px: 3
                     }}
                   >
                     Watch Trailer
-                  </GradientButton>
-                )}
-                {user && (
-                  <GradientButton
-                    variant="contained"
-                    colorstart={inWatchlist ? theme.palette.secondary.light : theme.palette.primary.light}
-                    colorend={inWatchlist ? theme.palette.secondary.dark : theme.palette.primary.dark}
-                    startIcon={inWatchlist ? <BookmarkRemoveIcon /> : <BookmarkAddIcon />}
-                    onClick={handleWatchlistAction}
-                    disabled={watchlistLoading}
-                    size="large"
-                    sx={{ py: 1.5, px: 3 }}
-                  >
-                    {watchlistLoading ? (
-                      <CircularProgress size={24} color="inherit" />
-                    ) : inWatchlist ? (
-                      "Remove from Watchlist"
-                    ) : (
-                      "Add to Watchlist"
-                    )}
-                  </GradientButton>
-                )}
+                  </Button>
+                </Stack>
+                
+                <GradientButton
+                  startIcon={inWatchlist ? <BookmarkRemoveIcon /> : <BookmarkAddIcon />}
+                  variant="contained"
+                  color="primary"
+                  onClick={handleWatchlistAction}
+                  disabled={watchlistLoading || !user}
+                  size="large"
+                  sx={{
+                    fontWeight: 'bold',
+                    px: 3,
+                    py: 1.5,
+                    borderRadius: 8,
+                    backdropFilter: 'blur(10px)',
+                  }}
+                >
+                  {watchlistLoading ? (
+                    <CircularProgress size={24} color="inherit" />
+                  ) : inWatchlist ? (
+                    isMobile ? "Remove" : "Remove from Watchlist"
+                  ) : (
+                    isMobile ? "Watchlist" : "Add to Watchlist"
+                  )}
+                </GradientButton>
               </Box>
             </BannerOverlay>
           </Box>
@@ -965,18 +953,16 @@ const MovieDetail = () => {
                 </Box>
               </Box>
               <Box sx={{ display: 'flex', gap: 2, mt: { xs: 2, md: 0 } }}>
-                {movie.trailerUrl && (
-                  <GradientButton
-                    variant="contained"
-                    colorstart="#e50914"
-                    colorend="#b71c1c"
-                    startIcon={<PlayArrowIcon />}
-                    onClick={handleOpenTrailer}
-                    size={isMobile ? "small" : "medium"}
-                  >
-                    {isMobile ? "Trailer" : "Watch Trailer"}
-                  </GradientButton>
-                )}
+                <GradientButton
+                  variant="contained"
+                  colorstart="#e50914"
+                  colorend="#b71c1c"
+                  startIcon={<PlayArrowIcon />}
+                  onClick={handleOpenTrailer}
+                  size={isMobile ? "small" : "medium"}
+                >
+                  {isMobile ? "Trailer" : "Watch Trailer"}
+                </GradientButton>
                 {user && (
                   <GradientButton
                     variant="contained"

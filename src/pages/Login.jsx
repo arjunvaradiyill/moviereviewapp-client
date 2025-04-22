@@ -106,8 +106,8 @@ const Login = () => {
           sx={{ 
             flex: 1, 
             background: isAdminLogin 
-              ? 'linear-gradient(135deg, #F57C00 0%, #FF9800 100%)' 
-              : 'linear-gradient(135deg, #1976D2 0%, #2196F3 100%)',
+              ? 'linear-gradient(135deg,rgb(245, 245, 245) 0%, #FF9800 100%)' 
+              : 'linear-gradient(135deg, #1976D2 0%,rgb(244, 244, 244) 100%)',
             color: 'white',
             p: { xs: 4, md: 6 },
             display: 'flex',
@@ -134,7 +134,7 @@ const Login = () => {
                 : <LocalMoviesIcon sx={{ fontSize: 36, mr: 1.5 }} />
               }
               <Typography variant="h4" fontWeight="bold">
-                {isAdminLogin ? 'MovieAura Admin' : 'MovieAura'}
+                {isAdminLogin ? 'MovieHub Admin' : 'MovieHub'}
               </Typography>
             </Box>
             <Typography variant="h3" fontWeight="bold" gutterBottom sx={{ mb: 2 }}>

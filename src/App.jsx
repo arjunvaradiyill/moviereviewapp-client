@@ -4,7 +4,7 @@ import { CssBaseline, Box, styled } from '@mui/material';
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider } from './context/AuthContext';
 import { useAuth } from './context/AuthContext';
-import ConnectionErrorHandler from './utils/ConnectionErrorHandler';
+import ConnectionErrorHandler from './components/ConnectionErrorHandler';
 
 // Components
 import Navbar from './components/Navbar';
@@ -20,6 +20,7 @@ import Profile from './pages/Profile';
 import Settings from './pages/Settings';
 import MyReviews from './pages/MyReviews';
 import LandingPage from './pages/LandingPage';
+import NotFound from './components/NotFound';
 
 // Styled component for the app layout
 const AppContainer = styled(Box)({
@@ -47,7 +48,7 @@ const AppRoutes = () => {
               <Route path="/" element={<LandingPage />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
-              <Route path="*" element={<Navigate to="/" replace />} />
+              <Route path="*" element={<NotFound />} />
             </>
           ) : (
             <>
@@ -65,7 +66,7 @@ const AppRoutes = () => {
               <Route path="/" element={<Navigate to="/home" replace />} />
               <Route path="/login" element={<Navigate to="/home" replace />} />
               <Route path="/register" element={<Navigate to="/home" replace />} />
-              <Route path="*" element={<Navigate to="/home" replace />} />
+              <Route path="*" element={<NotFound />} />
             </>
           )}
         </Routes>

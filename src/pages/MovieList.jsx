@@ -142,6 +142,9 @@ const MovieList = () => {
               <Card 
                 sx={{ 
                   cursor: 'pointer',
+                  height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
                   '&:hover': {
                     transform: 'scale(1.02)',
                     transition: 'transform 0.2s ease-in-out',
@@ -156,7 +159,7 @@ const MovieList = () => {
                   image={movie.posterUrl}
                   alt={movie.title}
                 />
-                <CardContent>
+                <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
                   <Typography gutterBottom variant="h5" component="div">
                     {movie.title}
                   </Typography>
@@ -169,9 +172,42 @@ const MovieList = () => {
                       ({movie.totalReviews} reviews)
                     </Typography>
                   </Box>
-                  <Typography variant="body2" color="text.secondary">
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
                     {movie.description.substring(0, 100)}...
                   </Typography>
+                  <Box 
+                    sx={{ 
+                      mt: 'auto', 
+                      display: 'flex', 
+                      justifyContent: 'center'
+                    }}
+                  >
+                    <Box 
+                      component="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleMovieClick(movie._id);
+                      }}
+                      sx={{
+                        backgroundColor: '#FF9800',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '8px',
+                        padding: '10px 20px',
+                        fontSize: '0.9rem',
+                        fontWeight: 'bold',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s',
+                        '&:hover': {
+                          backgroundColor: '#F57C00',
+                          transform: 'translateY(-2px)',
+                          boxShadow: '0 4px 8px rgba(0,0,0,0.2)'
+                        }
+                      }}
+                    >
+                      View Details
+                    </Box>
+                  </Box>
                 </CardContent>
               </Card>
             </Grid>

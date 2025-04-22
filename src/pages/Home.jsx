@@ -76,7 +76,7 @@ const PosterOverlay = styled(Box)(({ theme }) => ({
   left: 0,
   right: 0,
   bottom: 0,
-  background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 50%)',
+  background: 'linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.5) 50%, transparent 100%)',
   display: 'flex',
   flexDirection: 'column',
   justifyContent: 'flex-end',
@@ -326,22 +326,20 @@ const Home = () => {
         </FloatingIcon>
 
         <Box sx={{ textAlign: 'center', position: 'relative', zIndex: 2, maxWidth: 800, mx: 'auto' }}>
-          <Typography 
-            variant="h2" 
-            component="h1" 
-            gutterBottom 
-            sx={{ 
-              fontWeight: 900,
-              background: 'linear-gradient(45deg, #FF8E53 30%, #FE6B8B 90%)',
-              WebkitBackgroundClip: 'text',
-              backgroundClip: 'text',
-              textFillColor: 'transparent',
+          <Typography
+            variant="h2"
+            color="text.primary"
+            align="center"
+            sx={{
+              fontWeight: '700',
               mb: 2,
-              fontSize: { xs: '2rem', sm: '2.5rem', md: '3.5rem' },
-              textShadow: '0 5px 15px rgba(0,0,0,0.2)'
+              background: 'linear-gradient(45deg, #00796B 30%, #673AB7 90%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              textShadow: '0px 4px 3px rgba(0,0,0,0.1)',
             }}
           >
-            IFB
+            Welcome to MovieHub
           </Typography>
           <Typography 
             variant="h6" 
@@ -433,7 +431,19 @@ const Home = () => {
                       to={`/movies/${movie._id}`} 
                       size="small" 
                       fullWidth 
-                      sx={{ borderRadius: 8 }}
+                      sx={{ 
+                        borderRadius: 8,
+                        py: 1,
+                        fontWeight: 'bold',
+                        backgroundColor: '#FF9800',
+                        color: 'white',
+                        border: '2px solid white',
+                        '&:hover': {
+                          backgroundColor: '#F57C00',
+                          transform: 'translateY(-2px)',
+                          boxShadow: '0 4px 8px rgba(0,0,0,0.3)'
+                        }
+                      }}
                     >
                       View Details
                     </GradientButton>
@@ -549,7 +559,7 @@ const Home = () => {
                           image={movie.posterUrl || 'https://via.placeholder.com/300x450?text=Coming+Soon'}
                           alt={movie.title}
                         />
-                        <CardContent sx={{ flex: '1 0 auto', p: 2 }}>
+                        <CardContent sx={{ flex: '1 0 auto', p: 2, display: 'flex', flexDirection: 'column', height: '100%' }}>
                           <Typography gutterBottom variant="h6" component="h2">
                             {movie.title}
                           </Typography>
@@ -564,22 +574,27 @@ const Home = () => {
                             {movie.description?.substring(0, 100)}
                             {movie.description?.length > 100 ? '...' : ''}
                           </Typography>
+                          <Box sx={{ mt: 'auto', display: 'flex', justifyContent: 'center' }}>
                           <Button 
                             component={Link} 
                             to={`/movies/${movie._id}`}
-                            variant="outlined"
+                            variant="contained"
                             size="small"
                             sx={{ 
-                              borderColor: timelineColor,
-                              color: timelineColor,
+                              backgroundColor: '#FF9800',
+                              color: 'white',
+                              fontWeight: 'bold',
+                              minWidth: '120px',
                               '&:hover': {
-                                borderColor: timelineColor,
-                                backgroundColor: alpha(timelineColor, 0.1)
+                                backgroundColor: '#F57C00',
+                                transform: 'translateY(-2px)',
+                                boxShadow: '0 4px 8px rgba(0,0,0,0.2)'
                               }
                             }}
                           >
                             View Details
                           </Button>
+                          </Box>
                         </CardContent>
                       </Box>
                     </TimelineCard>

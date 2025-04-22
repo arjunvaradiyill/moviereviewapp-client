@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Define constants for ports
-const API_PORT = 8000;
+const API_PORT = 8001;
 
 // Determine the environment
 const isLocalhost = 
@@ -18,6 +18,12 @@ const isVercel =
 const getDevBaseUrl = () => {
   // Check if we are running locally
   if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+    // Use the port from the current URL for local development
+    const currentPort = window.location.port;
+    // If running on port 3000, ensure we use that specific port for API
+    if (currentPort === '3000') {
+      return `http://localhost:${API_PORT}`;
+    }
     return `http://localhost:${API_PORT}`;
   }
   // Default to the production URL if not running locally
@@ -80,5 +86,25 @@ instance.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+// Function to check if the server is available
+export const checkServerAvailability = async () => {
+  try {
+    // Use fetch directly to avoid axios interceptors
+    await fetch(`${baseURL}/api/health`, { 
+      method: 'GET',
+      mode: 'cors',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      }
+    });
+    console.log('Server is available');
+    return true;
+  } catch (error) {
+    console.error('Server availability check failed:', error);
+    return false;
+  }
+};
 
 export default instance;

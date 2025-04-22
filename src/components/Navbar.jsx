@@ -84,7 +84,23 @@ const Navbar = () => {
         >
           <Box component="span" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <MovieIcon sx={{ fontSize: 26 }} />
-            MovieAura
+            <Typography
+              variant="h6"
+              noWrap
+              component="div"
+              sx={{
+                display: { xs: 'none', sm: 'flex' },
+                fontFamily: 'Poppins',
+                fontWeight: 700,
+                fontSize: '1.5rem',
+                letterSpacing: '0.05em',
+                color: 'inherit',
+                textDecoration: 'none',
+                alignItems: 'center',
+              }}
+            >
+              MovieHub
+            </Typography>
           </Box>
         </Typography>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 2 } }}>
