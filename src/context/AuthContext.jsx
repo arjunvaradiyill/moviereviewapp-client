@@ -70,9 +70,16 @@ export const AuthProvider = ({ children }) => {
       
       // Always use the API server based on environment
       const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-      const apiUrl = isLocalhost 
-        ? 'http://localhost:8001' 
-        : 'https://entri-movie-server-0rwr.onrender.com';
+      const isRender = window.location.hostname.includes('onrender.com');
+      
+      let apiUrl;
+      if (isLocalhost) {
+        apiUrl = 'http://localhost:8001';
+      } else if (isRender) {
+        apiUrl = 'https://entri-movie-server-0rwr.onrender.com';
+      } else {
+        apiUrl = 'https://entri-movie-server-0rwr.onrender.com';
+      }
       
       console.log('Login using API URL:', apiUrl);
       console.log('Sending login request with email:', email);
@@ -85,7 +92,9 @@ export const AuthProvider = ({ children }) => {
         data: { email, password },
         withCredentials: false, // Disable withCredentials to avoid CORS issues
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Origin': window.location.origin
         }
       });
       
@@ -142,9 +151,16 @@ export const AuthProvider = ({ children }) => {
 
       // Always use the API server based on environment
       const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-      const apiUrl = isLocalhost 
-        ? 'http://localhost:8001' 
-        : 'https://entri-movie-server-0rwr.onrender.com';
+      const isRender = window.location.hostname.includes('onrender.com');
+      
+      let apiUrl;
+      if (isLocalhost) {
+        apiUrl = 'http://localhost:8001';
+      } else if (isRender) {
+        apiUrl = 'https://entri-movie-server-0rwr.onrender.com';
+      } else {
+        apiUrl = 'https://entri-movie-server-0rwr.onrender.com';
+      }
       
       console.log('Register using API URL:', apiUrl);
       
@@ -160,7 +176,9 @@ export const AuthProvider = ({ children }) => {
         },
         withCredentials: false, // Disable withCredentials to avoid CORS issues
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Origin': window.location.origin
         }
       });
 

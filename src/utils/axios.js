@@ -14,25 +14,28 @@ const isVercel =
   process.env.VERCEL || 
   process.env.VERCEL_ENV;
 
+// Render-specific environment detection
+const isRender = window.location.hostname.includes('onrender.com');
+
 // In development, use local API; in production, use the production API URL
 const getDevBaseUrl = () => {
   // Check if we are running locally
-  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-    // Use the port from the current URL for local development
-    const currentPort = window.location.port;
-    // If running on port 3000, ensure we use that specific port for API
-    if (currentPort === '3000') {
-      return `http://localhost:${API_PORT}`;
-    }
+  if (isLocalhost) {
     return `http://localhost:${API_PORT}`;
   }
+  
+  // Use Render production URL
+  if (isRender) {
+    return 'https://entri-movie-server-0rwr.onrender.com';
+  }
+  
   // Default to the production URL if not running locally
   return 'https://entri-movie-server-0rwr.onrender.com';
 };
 
 const baseURL = getDevBaseUrl();
 
-console.log('Using API URL:', baseURL, 'Environment:', isLocalhost ? 'local' : (isVercel ? 'Vercel' : 'production'));
+console.log('Using API URL:', baseURL, 'Environment:', isLocalhost ? 'local' : (isVercel ? 'Vercel' : (isRender ? 'Render' : 'production')));
 
 // Create a simple axios instance without complex configurations
 const instance = axios.create({
