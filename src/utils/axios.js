@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Define constants for ports
-const API_PORT = 8001;
+const API_PORT = 8002;
 
 // Determine the environment
 const isLocalhost = 

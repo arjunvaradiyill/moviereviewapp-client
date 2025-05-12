@@ -3,9 +3,15 @@ import { Alert, Snackbar, Button, Box, Typography } from '@mui/material';
 import { checkServerAvailability } from '../utils/axios';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 
+// Determine if we're running locally
+const isLocalhost = 
+  window.location.hostname === 'localhost' || 
+  window.location.hostname === '127.0.0.1';
+
 const ConnectionErrorHandler = () => {
   const [connectionError, setConnectionError] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [message, setMessage] = useState('');
 
   const checkConnection = async () => {
     try {
@@ -13,6 +19,11 @@ const ConnectionErrorHandler = () => {
       setConnectionError(!isAvailable);
       if (!isAvailable) {
         setSnackbarOpen(true);
+        if (isLocalhost) {
+          setMessage('Cannot connect to API server. Make sure the server is running on port 8002. Run "cd server && npm run dev" in a separate terminal.');
+        } else {
+          setMessage('Cannot connect to the server. Please try again later. The server might be temporarily down or restarting.');
+        }
       }
     } catch (error) {
       console.error('Connection check error:', error);
@@ -59,7 +70,7 @@ const ConnectionErrorHandler = () => {
         >
           <ErrorOutlineIcon sx={{ mr: 1 }} />
           <Typography variant="body2" component="span">
-            Cannot connect to server. Some features may be unavailable.
+            {message}
           </Typography>
           <Button
             color="inherit"
@@ -95,7 +106,7 @@ const ConnectionErrorHandler = () => {
             </Button>
           }
         >
-          Cannot connect to the server. Please check your internet connection or try again later.
+          {message}
         </Alert>
       </Snackbar>
     </>

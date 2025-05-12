@@ -1,36 +1,58 @@
 import React from 'react';
-import { Box, Typography, styled, alpha } from '@mui/material';
+import { Box, Typography, styled } from '@mui/material';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import { useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
-const FooterContainer = styled(Box)(({ theme, islandingpage }) => ({
-  padding: theme.spacing(2),
-  textAlign: 'center',
-  color: islandingpage === 'true' ? alpha(theme.palette.common.white, 0.8) : alpha(theme.palette.text.secondary, 0.8),
-  borderTop: `1px solid ${islandingpage === 'true' ? alpha(theme.palette.common.white, 0.1) : alpha(theme.palette.divider, 0.1)}`,
-  backdropFilter: 'blur(5px)',
-  backgroundColor: islandingpage === 'true' ? 'transparent' : alpha(theme.palette.background.paper, 0.7),
-  position: islandingpage === 'true' ? 'absolute' : 'relative',
-  bottom: islandingpage === 'true' ? 0 : 'auto',
-  left: islandingpage === 'true' ? 0 : 'auto',
-  right: islandingpage === 'true' ? 0 : 'auto',
-  width: '100%',
-  '& .MuiSvgIcon-root': {
-    fontSize: 16,
-    color: islandingpage === 'true' ? theme.palette.secondary.light : theme.palette.secondary.main,
-    verticalAlign: 'middle',
-    margin: '0 4px',
-  }
-}));
+// Styled component with dynamic color based on theme mode
+const FooterContainer = styled(Box)(({ theme, islandingpage }) => {
+  const isLanding = islandingpage === 'true';
+  const isLightMode = theme.palette.mode === 'light';
+
+  return {
+    padding: theme.spacing(2),
+    textAlign: 'center',
+    color: isLanding
+      ? isLightMode
+        ? '#000' // High contrast text for light landing page
+        : '#fff' // White for dark theme
+      : theme.palette.text.secondary,
+    borderTop: `1px solid ${
+      isLanding
+        ? isLightMode
+          ? 'rgba(0, 0, 0, 0.1)'
+          : 'rgba(255, 255, 255, 0.1)'
+        : theme.palette.divider
+    }`,
+    backdropFilter: 'blur(5px)',
+    backgroundColor: isLanding
+      ? 'transparent'
+      : theme.palette.background.paper,
+    position: isLanding ? 'absolute' : 'relative',
+    bottom: isLanding ? 0 : 'auto',
+    left: isLanding ? 0 : 'auto',
+    right: isLanding ? 0 : 'auto',
+    width: '100%',
+    '& .MuiSvgIcon-root': {
+      fontSize: 16,
+      color: isLanding
+        ? isLightMode
+          ? '#000'
+          : '#fff'
+        : theme.palette.secondary.main,
+      verticalAlign: 'middle',
+      margin: '0 4px',
+    },
+  };
+});
 
 const Footer = () => {
   const location = useLocation();
   const { user } = useAuth();
-  
-  // Check if we're on the landing page
+
+  // Landing page is considered if at "/" and user is not logged in
   const isLandingPage = location.pathname === '/' && !user;
-  
+
   return (
     <FooterContainer islandingpage={isLandingPage ? 'true' : 'false'}>
       <Typography variant="body2">
@@ -40,4 +62,4 @@ const Footer = () => {
   );
 };
 
-export default Footer; 
+export default Footer;

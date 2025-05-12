@@ -14,7 +14,9 @@ import AdminRoute from './components/AdminRoute';
 function App() {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      <Navbar />
+      <Navbar toggleTheme={function (): void {
+        throw new Error('Function not implemented.');
+      } } />
       <Container component="main" sx={{ mt: 4, mb: 4, flex: 1 }}>
         <Routes>
           <Route path="/" element={<Home />} />

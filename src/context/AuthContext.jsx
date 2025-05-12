@@ -74,7 +74,7 @@ export const AuthProvider = ({ children }) => {
       
       let apiUrl;
       if (isLocalhost) {
-        apiUrl = 'http://localhost:8001';
+        apiUrl = 'http://localhost:8002';
       } else if (isRender) {
         apiUrl = 'https://entri-movie-server-0rwr.onrender.com';
       } else {
@@ -155,7 +155,7 @@ export const AuthProvider = ({ children }) => {
       
       let apiUrl;
       if (isLocalhost) {
-        apiUrl = 'http://localhost:8001';
+        apiUrl = 'http://localhost:8002';
       } else if (isRender) {
         apiUrl = 'https://entri-movie-server-0rwr.onrender.com';
       } else {
