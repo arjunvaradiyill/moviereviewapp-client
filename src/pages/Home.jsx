@@ -495,14 +495,14 @@ const Home = () => {
       <SectionDivider />
       
       {/* Upcoming Movies Section with Timeline */}
-      {upcomingMovies.length > 0 && (
+      {/* {upcomingMovies.length > 0 && (
         <Box sx={{ mb: 8 }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-            <SectionTitle variant="h4">
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}> */}
+            {/* <SectionTitle variant="h4">
               <NewReleasesIcon />
               Coming Soon
-            </SectionTitle>
-            <Button 
+            </SectionTitle> */}
+            {/* <Button 
               component={Link} 
               to="/movies?sort=releaseYear" 
               endIcon={<ArrowForwardIcon />}
@@ -526,10 +526,10 @@ const Home = () => {
               }}
             >
               View All
-            </Button>
-          </Box>
+          //   </Button> */}
+          {/* // </Box> */}
           
-          <TimelineContainer>
+          {/* <TimelineContainer>
             {upcomingMovies.map((movie, index) => {
               const timelineColor = getTimelineColor(movie.releaseMonth, movie.releaseYear, theme);
               const isLeft = index % 2 === 0;
@@ -602,10 +602,10 @@ const Home = () => {
                 </TimelineItem>
               );
             })}
-          </TimelineContainer>
-        </Box>
-      )}
-    </Container>
+          </TimelineContainer> */}
+        {/* </Box>
+    //   )} */}
+     </Container>
   );
 };
 
