@@ -30,7 +30,14 @@ import {
   Stack,
   useTheme,
   Tab,
-  Tabs
+  Tabs,
+  TextField,
+  InputAdornment,
+  FormControl,
+  InputLabel,
+  Select,
+  TablePagination,
+  Checkbox
 } from '@mui/material';
 import { styled, alpha } from '@mui/material/styles';
 import { Delete as DeleteIcon, Edit as EditIcon, Movie as MovieIcon, Link as LinkIcon, Person as PersonIcon, AdminPanelSettings as AdminPanelSettingsIcon } from '@mui/icons-material';
@@ -38,8 +45,9 @@ import axios from '../utils/axios';
 import MovieFormAdmin from '../components/MovieFormAdmin';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import { Add as AddIcon, Refresh as RefreshIcon, ArrowForward as ArrowForwardIcon, Star as StarIcon, CheckCircle as CheckCircleIcon } from '@mui/icons-material';
+import { Add as AddIcon, Refresh as RefreshIcon, ArrowForward as ArrowForwardIcon, Star as StarIcon, CheckCircle as CheckCircleIcon, Download as DownloadIcon } from '@mui/icons-material';
 import { Theaters as TheatersIcon } from '@mui/icons-material';
+import { Search as SearchIcon } from '@mui/icons-material';
 
 // Styled components
 const StyledCard = styled(Card)(({ theme }) => ({
@@ -139,6 +147,24 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   
+  // Search and filter states
+  const [movieSearch, setMovieSearch] = useState('');
+  const [movieGenreFilter, setMovieGenreFilter] = useState('all');
+  const [movieYearFilter, setMovieYearFilter] = useState('all');
+  const [userSearch, setUserSearch] = useState('');
+  const [userRoleFilter, setUserRoleFilter] = useState('all');
+
+  // Sorting states
+  const [movieSortField, setMovieSortField] = useState('title');
+  const [movieSortDirection, setMovieSortDirection] = useState('asc');
+  const [userSortField, setUserSortField] = useState('username');
+  const [userSortDirection, setUserSortDirection] = useState('asc');
+
+  // Pagination states
+  const [moviePage, setMoviePage] = useState(0);
+  const [userPage, setUserPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  
   // Dialog states
   const [openMovieDialog, setOpenMovieDialog] = useState(false);
   const [selectedMovie, setSelectedMovie] = useState(null);
@@ -148,6 +174,12 @@ const AdminDashboard = () => {
   // Menu states
   const [userActionsAnchorEl, setUserActionsAnchorEl] = useState(null);
   const [selectedUser, setSelectedUser] = useState(null);
+
+  // Bulk selection states
+  const [selectedMovies, setSelectedMovies] = useState([]);
+  const [selectedUsers, setSelectedUsers] = useState([]);
+  const [deleteMovieDialogOpen, setDeleteMovieDialogOpen] = useState(false);
+  const [movieToDelete, setMovieToDelete] = useState(null);
 
   useEffect(() => {
     fetchData();
@@ -348,15 +380,253 @@ const AdminDashboard = () => {
     handleCloseMovieDialog();
   };
 
-  const handleDeleteMovie = async (id) => {
-    if (window.confirm('Are you sure you want to delete this movie?')) {
+  const handleDeleteMovie = (movie) => {
+    setMovieToDelete(movie);
+    setDeleteMovieDialogOpen(true);
+  };
+
+  const confirmDeleteMovie = async () => {
+    try {
+      await axios.delete(`/movies/${movieToDelete._id}`);
+      fetchMovies();
+      fetchStats();
+      setDeleteMovieDialogOpen(false);
+      setMovieToDelete(null);
+    } catch (error) {
+      console.error('Error deleting movie:', error);
+      setError(error.response?.data?.message || 'Failed to delete movie');
+      setDeleteMovieDialogOpen(false);
+    }
+  };
+
+  // Filter functions
+  const filteredMovies = movies.filter(movie => {
+    const matchesSearch = movie.title.toLowerCase().includes(movieSearch.toLowerCase()) ||
+                         movie.director.toLowerCase().includes(movieSearch.toLowerCase());
+    const matchesGenre = movieGenreFilter === 'all' || movie.genre.includes(movieGenreFilter);
+    const matchesYear = movieYearFilter === 'all' || movie.releaseYear.toString() === movieYearFilter;
+    return matchesSearch && matchesGenre && matchesYear;
+  });
+
+  const filteredUsers = users.filter(user => {
+    const matchesSearch = user.username.toLowerCase().includes(userSearch.toLowerCase()) ||
+                         user.email.toLowerCase().includes(userSearch.toLowerCase());
+    const matchesRole = userRoleFilter === 'all' || user.role === userRoleFilter;
+    return matchesSearch && matchesRole;
+  });
+
+  // Get unique genres and years for filters
+  const uniqueGenres = [...new Set(movies.flatMap(movie => movie.genre))];
+  const uniqueYears = [...new Set(movies.map(movie => movie.releaseYear))].sort((a, b) => b - a);
+
+  // Sort functions
+  const sortMovies = (movies) => {
+    return [...movies].sort((a, b) => {
+      let comparison = 0;
+      if (movieSortField === 'title') {
+        comparison = a.title.localeCompare(b.title);
+      } else if (movieSortField === 'releaseYear') {
+        comparison = a.releaseYear - b.releaseYear;
+      } else if (movieSortField === 'director') {
+        comparison = a.director.localeCompare(b.director);
+      }
+      return movieSortDirection === 'asc' ? comparison : -comparison;
+    });
+  };
+
+  const sortUsers = (users) => {
+    return [...users].sort((a, b) => {
+      let comparison = 0;
+      if (userSortField === 'username') {
+        comparison = a.username.localeCompare(b.username);
+      } else if (userSortField === 'email') {
+        comparison = a.email.localeCompare(b.email);
+      } else if (userSortField === 'createdAt') {
+        comparison = new Date(a.createdAt) - new Date(b.createdAt);
+      } else if (userSortField === 'totalReviews') {
+        comparison = (a.totalReviews || 0) - (b.totalReviews || 0);
+      }
+      return userSortDirection === 'asc' ? comparison : -comparison;
+    });
+  };
+
+  // Handle sort
+  const handleMovieSort = (field) => {
+    if (movieSortField === field) {
+      setMovieSortDirection(movieSortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setMovieSortField(field);
+      setMovieSortDirection('asc');
+    }
+  };
+
+  const handleUserSort = (field) => {
+    if (userSortField === field) {
+      setUserSortDirection(userSortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setUserSortField(field);
+      setUserSortDirection('asc');
+    }
+  };
+
+  // Handle pagination
+  const handleChangePage = (event, newPage) => {
+    if (tabValue === 0) {
+      setMoviePage(newPage);
+    } else {
+      setUserPage(newPage);
+    }
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setMoviePage(0);
+    setUserPage(0);
+  };
+
+  // Get paginated and sorted data
+  const getPaginatedMovies = () => {
+    const filtered = filteredMovies;
+    const sorted = sortMovies(filtered);
+    const start = moviePage * rowsPerPage;
+    return sorted.slice(start, start + rowsPerPage);
+  };
+
+  const getPaginatedUsers = () => {
+    const filtered = filteredUsers;
+    const sorted = sortUsers(filtered);
+    const start = userPage * rowsPerPage;
+    return sorted.slice(start, start + rowsPerPage);
+  };
+
+  // Export functions
+  const exportMoviesToCSV = () => {
+    const headers = ['Title', 'Genre', 'Release Year', 'Director', 'Poster URL', 'Trailer URL'];
+    const csvData = filteredMovies.map(movie => [
+      movie.title,
+      movie.genre.join(', '),
+      movie.releaseYear,
+      movie.director,
+      movie.posterUrl || '',
+      movie.trailerUrl || ''
+    ]);
+    
+    const csvContent = [
+      headers.join(','),
+      ...csvData.map(row => row.join(','))
+    ].join('\n');
+    
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `movies_export_${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
+  };
+
+  const exportUsersToCSV = () => {
+    const headers = ['Username', 'Email', 'Role', 'Created At', 'Total Reviews'];
+    const csvData = filteredUsers.map(user => [
+      user.username,
+      user.email,
+      user.role,
+      new Date(user.createdAt).toLocaleDateString(),
+      user.totalReviews || 0
+    ]);
+    
+    const csvContent = [
+      headers.join(','),
+      ...csvData.map(row => row.join(','))
+    ].join('\n');
+    
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `users_export_${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
+  };
+
+  // Bulk selection handlers
+  const handleSelectAllMovies = (event) => {
+    if (event.target.checked) {
+      setSelectedMovies(getPaginatedMovies().map(movie => movie._id));
+    } else {
+      setSelectedMovies([]);
+    }
+  };
+
+  const handleSelectMovie = (movieId) => {
+    const selectedIndex = selectedMovies.indexOf(movieId);
+    let newSelected = [];
+
+    if (selectedIndex === -1) {
+      newSelected = newSelected.concat(selectedMovies, movieId);
+    } else if (selectedIndex === 0) {
+      newSelected = newSelected.concat(selectedMovies.slice(1));
+    } else if (selectedIndex === selectedMovies.length - 1) {
+      newSelected = newSelected.concat(selectedMovies.slice(0, -1));
+    } else if (selectedIndex > 0) {
+      newSelected = newSelected.concat(
+        selectedMovies.slice(0, selectedIndex),
+        selectedMovies.slice(selectedIndex + 1),
+      );
+    }
+
+    setSelectedMovies(newSelected);
+  };
+
+  const handleSelectAllUsers = (event) => {
+    if (event.target.checked) {
+      setSelectedUsers(getPaginatedUsers().map(user => user._id));
+    } else {
+      setSelectedUsers([]);
+    }
+  };
+
+  const handleSelectUser = (userId) => {
+    const selectedIndex = selectedUsers.indexOf(userId);
+    let newSelected = [];
+
+    if (selectedIndex === -1) {
+      newSelected = newSelected.concat(selectedUsers, userId);
+    } else if (selectedIndex === 0) {
+      newSelected = newSelected.concat(selectedUsers.slice(1));
+    } else if (selectedIndex === selectedUsers.length - 1) {
+      newSelected = newSelected.concat(selectedUsers.slice(0, -1));
+    } else if (selectedIndex > 0) {
+      newSelected = newSelected.concat(
+        selectedUsers.slice(0, selectedIndex),
+        selectedUsers.slice(selectedIndex + 1),
+      );
+    }
+
+    setSelectedUsers(newSelected);
+  };
+
+  // Bulk delete handlers
+  const handleBulkDeleteMovies = async () => {
+    if (window.confirm(`Are you sure you want to delete ${selectedMovies.length} movies?`)) {
       try {
-        await axios.delete(`/movies/${id}`);
+        await Promise.all(selectedMovies.map(id => axios.delete(`/movies/${id}`)));
+        setSelectedMovies([]);
         fetchMovies();
-        fetchStats(); // Update stats after deletion
+        fetchStats();
       } catch (error) {
-        console.error('Error deleting movie:', error);
-        setError(error.response?.data?.message || 'Failed to delete movie');
+        console.error('Error deleting movies:', error);
+        setError(error.response?.data?.message || 'Failed to delete movies');
+      }
+    }
+  };
+
+  const handleBulkDeleteUsers = async () => {
+    if (window.confirm(`Are you sure you want to delete ${selectedUsers.length} users?`)) {
+      try {
+        await Promise.all(selectedUsers.map(id => axios.delete(`/users/${id}`)));
+        setSelectedUsers([]);
+        fetchUsers();
+        fetchStats();
+      } catch (error) {
+        console.error('Error deleting users:', error);
+        setError(error.response?.data?.message || 'Failed to delete users');
       }
     }
   };
@@ -535,30 +805,123 @@ const AdminDashboard = () => {
                 <Typography variant="h6" sx={{ fontWeight: 600 }}>
                   Movie Library
                 </Typography>
-                <Button 
-                  variant="outlined" 
-                  startIcon={<AddIcon />}
-                  onClick={() => handleOpenMovieDialog()}
-                  sx={{ borderRadius: 2 }}
-                >
-                  Add Movie
-                </Button>
+                <Box sx={{ display: 'flex', gap: 2 }}>
+                  {selectedMovies.length > 0 && (
+                    <Button 
+                      variant="outlined" 
+                      color="error"
+                      startIcon={<DeleteIcon />}
+                      onClick={handleBulkDeleteMovies}
+                      sx={{ borderRadius: 2 }}
+                    >
+                      Delete Selected ({selectedMovies.length})
+                    </Button>
+                  )}
+                  <Button 
+                    variant="outlined" 
+                    startIcon={<DownloadIcon />}
+                    onClick={exportMoviesToCSV}
+                    sx={{ borderRadius: 2 }}
+                  >
+                    Export to CSV
+                  </Button>
+                  <Button 
+                    variant="outlined" 
+                    startIcon={<AddIcon />}
+                    onClick={() => handleOpenMovieDialog()}
+                    sx={{ borderRadius: 2 }}
+                  >
+                    Add Movie
+                  </Button>
+                </Box>
+              </Box>
+
+              {/* Movie Search and Filters */}
+              <Box sx={{ mb: 3, display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+                <TextField
+                  size="small"
+                  placeholder="Search movies..."
+                  value={movieSearch}
+                  onChange={(e) => setMovieSearch(e.target.value)}
+                  sx={{ minWidth: 200 }}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <SearchIcon />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+                <FormControl size="small" sx={{ minWidth: 150 }}>
+                  <InputLabel>Genre</InputLabel>
+                  <Select
+                    value={movieGenreFilter}
+                    label="Genre"
+                    onChange={(e) => setMovieGenreFilter(e.target.value)}
+                  >
+                    <MenuItem value="all">All Genres</MenuItem>
+                    {uniqueGenres.map(genre => (
+                      <MenuItem key={genre} value={genre}>{genre}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                <FormControl size="small" sx={{ minWidth: 150 }}>
+                  <InputLabel>Year</InputLabel>
+                  <Select
+                    value={movieYearFilter}
+                    label="Year"
+                    onChange={(e) => setMovieYearFilter(e.target.value)}
+                  >
+                    <MenuItem value="all">All Years</MenuItem>
+                    {uniqueYears.map(year => (
+                      <MenuItem key={year} value={year}>{year}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
               </Box>
               
               <StyledTableContainer>
                 <Table>
                   <TableHead>
                     <TableRow>
-                      <TableCell>Title</TableCell>
+                      <TableCell padding="checkbox">
+                        <Checkbox
+                          indeterminate={selectedMovies.length > 0 && selectedMovies.length < getPaginatedMovies().length}
+                          checked={getPaginatedMovies().length > 0 && selectedMovies.length === getPaginatedMovies().length}
+                          onChange={handleSelectAllMovies}
+                        />
+                      </TableCell>
+                      <TableCell 
+                        onClick={() => handleMovieSort('title')}
+                        sx={{ cursor: 'pointer' }}
+                      >
+                        Title {movieSortField === 'title' && (
+                          <span>{movieSortDirection === 'asc' ? '↑' : '↓'}</span>
+                        )}
+                      </TableCell>
                       <TableCell>Genre</TableCell>
-                      <TableCell>Release Year</TableCell>
-                      <TableCell>Director</TableCell>
+                      <TableCell 
+                        onClick={() => handleMovieSort('releaseYear')}
+                        sx={{ cursor: 'pointer' }}
+                      >
+                        Release Year {movieSortField === 'releaseYear' && (
+                          <span>{movieSortDirection === 'asc' ? '↑' : '↓'}</span>
+                        )}
+                      </TableCell>
+                      <TableCell 
+                        onClick={() => handleMovieSort('director')}
+                        sx={{ cursor: 'pointer' }}
+                      >
+                        Director {movieSortField === 'director' && (
+                          <span>{movieSortDirection === 'asc' ? '↑' : '↓'}</span>
+                        )}
+                      </TableCell>
                       <TableCell>Media</TableCell>
                       <TableCell>Actions</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {movies.length === 0 ? (
+                    {filteredMovies.length === 0 ? (
                       <TableRow>
                         <TableCell colSpan={6} align="center">
                           <Box sx={{ py: 3 }}>
@@ -577,8 +940,17 @@ const AdminDashboard = () => {
                         </TableCell>
                       </TableRow>
                     ) : (
-                      movies.map((movie) => (
-                        <TableRow key={movie._id}>
+                      getPaginatedMovies().map((movie) => (
+                        <TableRow 
+                          key={movie._id}
+                          selected={selectedMovies.indexOf(movie._id) !== -1}
+                        >
+                          <TableCell padding="checkbox">
+                            <Checkbox
+                              checked={selectedMovies.indexOf(movie._id) !== -1}
+                              onChange={() => handleSelectMovie(movie._id)}
+                            />
+                          </TableCell>
                           <TableCell>
                             <Box sx={{ display: 'flex', alignItems: 'center' }}>
                               {movie.posterUrl ? (
@@ -667,7 +1039,7 @@ const AdminDashboard = () => {
                               </Tooltip>
                               <Tooltip title="Delete movie">
                                 <IconButton 
-                                  onClick={() => handleDeleteMovie(movie._id)}
+                                  onClick={() => handleDeleteMovie(movie)}
                                   size="small"
                                   color="error"
                                 >
@@ -681,6 +1053,15 @@ const AdminDashboard = () => {
                     )}
                   </TableBody>
                 </Table>
+                <TablePagination
+                  rowsPerPageOptions={[5, 10, 25]}
+                  component="div"
+                  count={filteredMovies.length}
+                  rowsPerPage={rowsPerPage}
+                  page={moviePage}
+                  onPageChange={handleChangePage}
+                  onRowsPerPageChange={handleChangeRowsPerPage}
+                />
               </StyledTableContainer>
             </>
           )}
@@ -692,30 +1073,116 @@ const AdminDashboard = () => {
                 <Typography variant="h6" sx={{ fontWeight: 600 }}>
                   User Management
                 </Typography>
-                <Button 
-                  variant="outlined" 
-                  startIcon={<RefreshIcon />}
-                  onClick={fetchUsers}
-                  sx={{ borderRadius: 2 }}
-                >
-                  Refresh Users
-                </Button>
+                <Box sx={{ display: 'flex', gap: 2 }}>
+                  {selectedUsers.length > 0 && (
+                    <Button 
+                      variant="outlined" 
+                      color="error"
+                      startIcon={<DeleteIcon />}
+                      onClick={handleBulkDeleteUsers}
+                      sx={{ borderRadius: 2 }}
+                    >
+                      Delete Selected ({selectedUsers.length})
+                    </Button>
+                  )}
+                  <Button 
+                    variant="outlined" 
+                    startIcon={<DownloadIcon />}
+                    onClick={exportUsersToCSV}
+                    sx={{ borderRadius: 2 }}
+                  >
+                    Export to CSV
+                  </Button>
+                  <Button 
+                    variant="outlined" 
+                    startIcon={<RefreshIcon />}
+                    onClick={fetchUsers}
+                    sx={{ borderRadius: 2 }}
+                  >
+                    Refresh Users
+                  </Button>
+                </Box>
+              </Box>
+
+              {/* User Search and Filters */}
+              <Box sx={{ mb: 3, display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+                <TextField
+                  size="small"
+                  placeholder="Search users..."
+                  value={userSearch}
+                  onChange={(e) => setUserSearch(e.target.value)}
+                  sx={{ minWidth: 200 }}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <SearchIcon />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+                <FormControl size="small" sx={{ minWidth: 150 }}>
+                  <InputLabel>Role</InputLabel>
+                  <Select
+                    value={userRoleFilter}
+                    label="Role"
+                    onChange={(e) => setUserRoleFilter(e.target.value)}
+                  >
+                    <MenuItem value="all">All Roles</MenuItem>
+                    <MenuItem value="admin">Admin</MenuItem>
+                    <MenuItem value="user">User</MenuItem>
+                  </Select>
+                </FormControl>
               </Box>
               
               <StyledTableContainer>
                 <Table>
                   <TableHead>
                     <TableRow>
-                      <TableCell>Username</TableCell>
-                      <TableCell>Email</TableCell>
+                      <TableCell padding="checkbox">
+                        <Checkbox
+                          indeterminate={selectedUsers.length > 0 && selectedUsers.length < getPaginatedUsers().length}
+                          checked={getPaginatedUsers().length > 0 && selectedUsers.length === getPaginatedUsers().length}
+                          onChange={handleSelectAllUsers}
+                        />
+                      </TableCell>
+                      <TableCell 
+                        onClick={() => handleUserSort('username')}
+                        sx={{ cursor: 'pointer' }}
+                      >
+                        Username {userSortField === 'username' && (
+                          <span>{userSortDirection === 'asc' ? '↑' : '↓'}</span>
+                        )}
+                      </TableCell>
+                      <TableCell 
+                        onClick={() => handleUserSort('email')}
+                        sx={{ cursor: 'pointer' }}
+                      >
+                        Email {userSortField === 'email' && (
+                          <span>{userSortDirection === 'asc' ? '↑' : '↓'}</span>
+                        )}
+                      </TableCell>
                       <TableCell>Role</TableCell>
-                      <TableCell>Created At</TableCell>
-                      <TableCell>Reviews</TableCell>
+                      <TableCell 
+                        onClick={() => handleUserSort('createdAt')}
+                        sx={{ cursor: 'pointer' }}
+                      >
+                        Created At {userSortField === 'createdAt' && (
+                          <span>{userSortDirection === 'asc' ? '↑' : '↓'}</span>
+                        )}
+                      </TableCell>
+                      <TableCell 
+                        onClick={() => handleUserSort('totalReviews')}
+                        sx={{ cursor: 'pointer' }}
+                      >
+                        Reviews {userSortField === 'totalReviews' && (
+                          <span>{userSortDirection === 'asc' ? '↑' : '↓'}</span>
+                        )}
+                      </TableCell>
                       <TableCell>Actions</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {users.length === 0 ? (
+                    {filteredUsers.length === 0 ? (
                       <TableRow>
                         <TableCell colSpan={6} align="center">
                           <Typography color="text.secondary" sx={{ py: 3 }}>
@@ -724,8 +1191,17 @@ const AdminDashboard = () => {
                         </TableCell>
                       </TableRow>
                     ) : (
-                      users.map((user) => (
-                        <TableRow key={user._id}>
+                      getPaginatedUsers().map((user) => (
+                        <TableRow 
+                          key={user._id}
+                          selected={selectedUsers.indexOf(user._id) !== -1}
+                        >
+                          <TableCell padding="checkbox">
+                            <Checkbox
+                              checked={selectedUsers.indexOf(user._id) !== -1}
+                              onChange={() => handleSelectUser(user._id)}
+                            />
+                          </TableCell>
                           <TableCell>
                             <Box sx={{ display: 'flex', alignItems: 'center' }}>
                               {user.profilePicture ? (
@@ -820,6 +1296,15 @@ const AdminDashboard = () => {
                     )}
                   </TableBody>
                 </Table>
+                <TablePagination
+                  rowsPerPageOptions={[5, 10, 25]}
+                  component="div"
+                  count={filteredUsers.length}
+                  rowsPerPage={rowsPerPage}
+                  page={userPage}
+                  onPageChange={handleChangePage}
+                  onRowsPerPageChange={handleChangeRowsPerPage}
+                />
               </StyledTableContainer>
             </>
           )}
@@ -914,6 +1399,61 @@ const AdminDashboard = () => {
             autoFocus
           >
             Delete User
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Delete Movie Dialog */}
+      <Dialog
+        open={deleteMovieDialogOpen}
+        onClose={() => setDeleteMovieDialogOpen(false)}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+        PaperProps={{
+          sx: { borderRadius: 3, p: 1 }
+        }}
+      >
+        <DialogTitle id="alert-dialog-title" sx={{ pt: 3 }}>
+          <Typography variant="h5" sx={{ fontWeight: 600 }}>
+            Confirm Movie Deletion
+          </Typography>
+        </DialogTitle>
+        <DialogContent>
+          {movieToDelete && (
+            <Box>
+              <Typography variant="body1" sx={{ mb: 2 }}>
+                Are you sure you want to delete movie <strong>{movieToDelete.title}</strong>?
+              </Typography>
+              <Box sx={{ bgcolor: 'background.paper', p: 2, borderRadius: 2, mb: 2, border: `1px solid ${alpha(theme.palette.divider, 0.2)}` }}>
+                <Typography variant="body2" sx={{ mb: 1 }}>
+                  <strong>Director:</strong> {movieToDelete.director}
+                </Typography>
+                <Typography variant="body2" sx={{ mb: 1 }}>
+                  <strong>Release Year:</strong> {movieToDelete.releaseYear}
+                </Typography>
+                <Typography variant="body2">
+                  <strong>Genre:</strong> {movieToDelete.genre.join(', ')}
+                </Typography>
+              </Box>
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 3 }}>
+          <Button 
+            onClick={() => setDeleteMovieDialogOpen(false)} 
+            variant="outlined"
+            sx={{ borderRadius: 2 }}
+          >
+            Cancel
+          </Button>
+          <Button 
+            onClick={confirmDeleteMovie} 
+            color="error" 
+            variant="contained"
+            sx={{ borderRadius: 2 }}
+            autoFocus
+          >
+            Delete Movie
           </Button>
         </DialogActions>
       </Dialog>

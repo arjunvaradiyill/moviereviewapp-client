@@ -1,6 +1,6 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { CssBaseline, Box, styled } from '@mui/material';
+import { CssBaseline, Box, styled, ThemeProvider as MuiThemeProvider, createTheme } from '@mui/material';
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider } from './context/AuthContext';
 import { useAuth } from './context/AuthContext';
@@ -31,6 +31,38 @@ const AppContainer = styled(Box)({
 
 const MainContent = styled(Box)({
   flex: 1,
+});
+
+// Create a theme instance
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: '#1976d2',
+    },
+    secondary: {
+      main: '#dc004e',
+    },
+  },
+  typography: {
+    fontFamily: [
+      '-apple-system',
+      'BlinkMacSystemFont',
+      '"Segoe UI"',
+      'Roboto',
+      '"Helvetica Neue"',
+      'Arial',
+      'sans-serif',
+    ].join(','),
+  },
+  components: {
+    MuiDataGrid: {
+      styleOverrides: {
+        root: {
+          backgroundColor: 'transparent',
+        },
+      },
+    },
+  },
 });
 
 // Create a wrapper component that uses the auth context
@@ -108,14 +140,16 @@ const DevelopmentBanner = () => {
 
 const App = () => {
   return (
-    <ThemeProvider>
+    <MuiThemeProvider theme={theme}>
       <CssBaseline />
-      <AuthProvider>
-        <ConnectionErrorHandler />
-        <DevelopmentBanner />
-        <AppRoutes />
-      </AuthProvider>
-    </ThemeProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <ConnectionErrorHandler />
+          <DevelopmentBanner />
+          <AppRoutes />
+        </AuthProvider>
+      </ThemeProvider>
+    </MuiThemeProvider>
   );
 };
 

@@ -18,7 +18,6 @@ import {
 } from '@mui/material';
 import StarIcon from '@mui/icons-material/Star';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import NewReleasesIcon from '@mui/icons-material/NewReleases';
 import MovieIcon from '@mui/icons-material/Movie';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import axios from '../utils/axios';
@@ -148,94 +147,9 @@ const RatingChip = styled(Chip)(({ theme }) => ({
   }
 }));
 
-// Timeline styled components
-const TimelineContainer = styled(Box)(({ theme }) => ({
-  position: 'relative',
-  paddingTop: theme.spacing(4),
-  paddingBottom: theme.spacing(6),
-  '&:before': {
-    content: '""',
-    position: 'absolute',
-    top: 0,
-    bottom: 0,
-    left: '50%',
-    width: '4px',
-    backgroundColor: alpha(theme.palette.primary.main, 0.2),
-    borderRadius: '4px',
-    transform: 'translateX(-50%)',
-  }
-}));
-
-const TimelineItem = styled(Box)(({ theme, align }) => ({
-  position: 'relative',
-  marginBottom: theme.spacing(8),
-  width: '100%',
-  display: 'flex',
-  justifyContent: align === 'left' ? 'flex-start' : 'flex-end',
-  [theme.breakpoints.down('md')]: {
-    justifyContent: 'flex-end',
-    paddingLeft: '40px',
-  }
-}));
-
-const TimelineContent = styled(Box)(({ theme, align }) => ({
-  width: '45%',
-  position: 'relative',
-  transition: 'transform 0.3s ease',
-  '&:hover': {
-    transform: 'translateY(-8px)',
-  },
-  [theme.breakpoints.down('md')]: {
-    width: '90%',
-  }
-}));
-
-const TimelineDot = styled(Box)(({ theme, align }) => ({
-  position: 'absolute',
-  width: '20px',
-  height: '20px',
-  borderRadius: '50%',
-  backgroundColor: theme.palette.primary.main,
-  top: '50%',
-  left: align === 'left' ? 'calc(100% + 14px)' : 'auto',
-  right: align === 'right' ? 'calc(100% + 14px)' : 'auto',
-  transform: 'translateY(-50%)',
-  zIndex: 2,
-  boxShadow: `0 0 0 4px ${alpha(theme.palette.primary.main, 0.2)}`,
-  [theme.breakpoints.down('md')]: {
-    left: '-30px',
-    right: 'auto',
-  }
-}));
-
-const TimelineDate = styled(Typography)(({ theme, align }) => ({
-  position: 'absolute',
-  top: '50%',
-  transform: 'translateY(-50%)',
-  left: align === 'left' ? 'auto' : 'calc(100% + 40px)',
-  right: align === 'right' ? 'auto' : 'calc(100% + 40px)',
-  color: theme.palette.text.secondary,
-  fontWeight: 'bold',
-  [theme.breakpoints.down('md')]: {
-    display: 'none',
-  }
-}));
-
-const TimelineCard = styled(Card)(({ theme }) => ({
-  overflow: 'hidden',
-  borderRadius: theme.shape.borderRadius * 2,
-  boxShadow: theme.shadows[3],
-  height: '100%',
-  transition: 'box-shadow 0.3s ease',
-  '&:hover': {
-    boxShadow: theme.shadows[10],
-  }
-}));
-
 const Home = () => {
   const theme = useTheme();
   const [latestMovies, setLatestMovies] = useState([]);
-  const [upcomingMovies, setUpcomingMovies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -253,22 +167,7 @@ const Home = () => {
     return `${monthNames[month - 1]} ${year}`;
   };
 
-  // Helper to get a theme color based on the release date
-  const getTimelineColor = (releaseMonth, releaseYear, theme) => {
-    const currentDate = new Date();
-    const currentYear = currentDate.getFullYear();
-    const currentMonth = currentDate.getMonth() + 1;
-    
-    // Calculate how far in the future the movie is
-    const monthsDiff = ((releaseYear - currentYear) * 12) + (releaseMonth - currentMonth);
-    
-    if (monthsDiff <= 1) return theme.palette.error.main; // Very soon - red
-    if (monthsDiff <= 3) return theme.palette.warning.main; // Soon - orange
-    if (monthsDiff <= 6) return theme.palette.info.main; // Medium term - blue
-    return theme.palette.success.main; // Long term - green
-  };
-
-  // Fetch latest and upcoming movies
+  // Fetch latest movies
   useEffect(() => {
     const fetchMovies = async () => {
       try {
@@ -277,10 +176,6 @@ const Home = () => {
         // Fetch latest movies
         const latestResponse = await axios.get('/movies?sort=-releaseYear&limit=8');
         setLatestMovies(latestResponse.data);
-        
-        // Fetch upcoming movies
-        const upcomingResponse = await axios.get('/movies/upcoming');
-        setUpcomingMovies(upcomingResponse.data);
         
         setLoading(false);
       } catch (err) {
@@ -493,119 +388,7 @@ const Home = () => {
       </Box>
 
       <SectionDivider />
-      
-      {/* Upcoming Movies Section with Timeline */}
-      {/* {upcomingMovies.length > 0 && (
-        <Box sx={{ mb: 8 }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}> */}
-            {/* <SectionTitle variant="h4">
-              <NewReleasesIcon />
-              Coming Soon
-            </SectionTitle> */}
-            {/* <Button 
-              component={Link} 
-              to="/movies?sort=releaseYear" 
-              endIcon={<ArrowForwardIcon />}
-              sx={{ 
-                fontWeight: 'bold',
-                position: 'relative',
-                overflow: 'hidden',
-                '&::after': {
-                  content: '""',
-                  position: 'absolute',
-                  bottom: 0,
-                  left: 0,
-                  width: '100%',
-                  height: '2px',
-                  backgroundColor: 'transparent',
-                  transition: 'background-color 0.3s ease',
-                },
-                '&:hover::after': {
-                  backgroundColor: theme.palette.primary.main,
-                }
-              }}
-            >
-              View All
-          //   </Button> */}
-          {/* // </Box> */}
-          
-          {/* <TimelineContainer>
-            {upcomingMovies.map((movie, index) => {
-              const timelineColor = getTimelineColor(movie.releaseMonth, movie.releaseYear, theme);
-              const isLeft = index % 2 === 0;
-              
-              return (
-                <TimelineItem key={movie._id} align={isLeft ? 'left' : 'right'}>
-                  <TimelineContent align={isLeft ? 'left' : 'right'}>
-                    <TimelineDot 
-                      align={isLeft ? 'left' : 'right'} 
-                      sx={{ backgroundColor: timelineColor }}
-                    />
-                    <TimelineDate 
-                      variant="subtitle1" 
-                      align={isLeft ? 'left' : 'right'}
-                    >
-                      {formatReleaseDate(movie.releaseMonth, movie.releaseYear)}
-                    </TimelineDate>
-                    <TimelineCard>
-                      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' } }}>
-                        <CardMedia
-                          component="img"
-                          sx={{ 
-                            width: { xs: '100%', sm: '150px' }, 
-                            height: { xs: '200px', sm: '100%' },
-                            objectFit: 'cover'
-                          }}
-                          image={movie.posterUrl || 'https://via.placeholder.com/300x450?text=Coming+Soon'}
-                          alt={movie.title}
-                        />
-                        <CardContent sx={{ flex: '1 0 auto', p: 2, display: 'flex', flexDirection: 'column', height: '100%' }}>
-                          <Typography gutterBottom variant="h6" component="h2">
-                            {movie.title}
-                          </Typography>
-                          <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                            {formatReleaseDate(movie.releaseMonth, movie.releaseYear)}
-                          </Typography>
-                          <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                            {movie.genre.slice(0, 2).join(', ')}
-                            {movie.genre.length > 2 && '...'}
-                          </Typography>
-                          <Typography variant="body2" sx={{ mb: 2 }}>
-                            {movie.description?.substring(0, 100)}
-                            {movie.description?.length > 100 ? '...' : ''}
-                          </Typography>
-                          <Box sx={{ mt: 'auto', display: 'flex', justifyContent: 'center' }}>
-                          <Button 
-                            component={Link} 
-                            to={`/movies/${movie._id}`}
-                            variant="contained"
-                            size="small"
-                            sx={{ 
-                              backgroundColor: '#FF9800',
-                              color: 'white',
-                              fontWeight: 'bold',
-                              minWidth: '120px',
-                              '&:hover': {
-                                backgroundColor: '#F57C00',
-                                transform: 'translateY(-2px)',
-                                boxShadow: '0 4px 8px rgba(0,0,0,0.2)'
-                              }
-                            }}
-                          >
-                            View Details
-                          </Button>
-                          </Box>
-                        </CardContent>
-                      </Box>
-                    </TimelineCard>
-                  </TimelineContent>
-                </TimelineItem>
-              );
-            })}
-          </TimelineContainer> */}
-        {/* </Box>
-    //   )} */}
-     </Container>
+    </Container>
   );
 };
 

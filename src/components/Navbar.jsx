@@ -65,7 +65,14 @@ const Navbar = () => {
   };
 
   return (
-    <AppBar position="sticky" elevation={0}>
+    <AppBar
+      position="sticky"
+      elevation={0}
+      sx={{
+        background: 'rgba(0,0,0,0.85)',
+        color: '#fff'
+      }}
+    >
       <Toolbar sx={{ py: 1 }}>
         <Typography
           variant="h6"
@@ -260,19 +267,19 @@ const Navbar = () => {
               >
                 Sign Up
               </Button>
-              <Button 
-                variant="outlined" 
-                component={RouterLink} 
+              <Button
+                variant="outlined"
+                component={RouterLink}
                 to="/login"
                 size="small"
-                color="inherit"
                 sx={{
                   fontWeight: 500,
                   px: { xs: 2, sm: 3 },
                   py: 0.75,
-                  borderColor: 'text.primary',
+                  borderColor: '#fff',
+                  color: '#fff',
                   '&:hover': {
-                    borderColor: 'text.primary',
+                    borderColor: '#fff',
                     bgcolor: 'rgba(255,255,255,0.1)'
                   }
                 }}
@@ -282,12 +289,12 @@ const Navbar = () => {
               <Button 
                 component={RouterLink} 
                 to="/login?admin=true"
-                color="inherit"
                 size="small"
                 startIcon={<AdminPanelSettingsIcon />}
                 sx={{
                   display: { xs: 'none', sm: 'inline-flex' },
                   fontWeight: 500,
+                  color: '#fff'
                 }}
               >
                 Admin
